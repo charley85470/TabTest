@@ -1,0 +1,62 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="ExtraSmallBlackTextSize">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="SmallBlackTextSize">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="NormalBlackTextSize">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="MediumBlackTextSize">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="ExtraLargeBlackTextSize">
+        <item name="android:textSize">30sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="LargeBlackTextSize">
+        <item name="android:textSize">26sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="EditTextStyle">
+        <item name="colorControlActivated">@color/colorAccent</item>
+        <item name="colorControlHighlight">@color/colorAccent</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="BlueButton" parent="Theme.AppCompat.Light">
+        <item name="colorControlHighlight">@color/colorButtonBluePressed</item>
+        <item name="colorButtonNormal">@color/colorButtonBlueDefault</item>
+    </style>
+
+    <style name="FullWidthEditText" parent="Widget.AppCompat.EditText">
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">20dp</item>
+        <item name="android:paddingLeft">5dp</item>
+        <item name="android:paddingRight">5dp</item>
+        <item name="android:background">@null</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+</resources>

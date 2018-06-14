@@ -1,0 +1,54 @@
+apply plugin: 'com.android.application'
+apply from: "${project.rootDir}/myConfigs/utils.gradle"
+
+android {
+    compileSdkVersion 27
+    defaultConfig {
+        applicationId "com.esunergy.ams_app_source"
+        minSdkVersion 15
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        def TIME_SECRET_KEY = "esunergy_ams@2018"
+        buildConfigField 'String', 'TIME_SECRET_KEY', toJavaCodeString(TIME_SECRET_KEY)
+
+        def LOG_ENABLE = "logTRUE"
+        buildConfigField 'String', 'LOG_ENABLE', toJavaCodeString(LOG_ENABLE)
+
+        def SERVER_BASE_URL = "http://118.163.87.193/"
+        buildConfigField 'String', 'SERVER_BASE_URL', toJavaCodeString(SERVER_BASE_URL)
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:design:27.0.0'
+    implementation 'com.android.support:appcompat-v7:27.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.1'
+    implementation 'com.android.support:support-v4:27.0.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+
+    // add package
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation('com.afollestad.material-dialogs:core:0.9.6.0') {
+        exclude group: 'com.android.support'
+    }
+
+    repositories {
+        mavenCentral()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    }
+    implementation 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
+
+    implementation 'com.scottyab:secure-preferences-lib:0.1.4'
+}

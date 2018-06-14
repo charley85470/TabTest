@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ams_app_source</string>
+    <string name="dialog_title_normal">訊息</string>
+    <string name="dialog_check_version_loading">版本檢查中…請稍候…</string>
+    <string name="internet_error">網路異常，請確認網路流暢後再試。</string>
+    <string name="dialog_loading">請稍候…</string>
+    <string name="connection_err_412">更新資料失敗，請確認資料是否存在</string>
+    <string name="connection_err_500">系統發生錯誤，請洽管理員</string>
+    <string name="password">密碼</string>
+    <string name="account">帳號</string>
+    <string name="login">登入</string>
+    <string name="cancel">取消</string>
+    <string name="version">版本：%1$s</string>
+    <string name="hint_account">請輸入帳號</string>
+    <string name="confirm">確定</string>
+    <string name="login_fail">登入失敗</string>
+</resources>

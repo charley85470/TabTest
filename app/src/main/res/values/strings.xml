@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">ams_app_source</string>
+    <string name="dialog_title_normal">Message</string>
+    <string name="dialog_check_version_loading">App Version Checking...</string>
+    <string name="internet_error">Internet Error</string>
+    <string name="dialog_loading">Loading...</string>
+    <string name="connection_err_412">Update Fail, Please sure the data exist.</string>
+    <string name="connection_err_500">System ERROR. Please contact to system admin.</string>
+    <string name="password">Password</string>
+    <string name="account">Account</string>
+    <string name="login">Login</string>
+    <string name="cancel">Cancel</string>
+    <string name="version">Ver.：%1$s</string>
+    <string name="hint_account">Please input account</string>
+    <string name="confirm">Confirm</string>
+    <string name="login_fail">Login Fail</string>
+</resources>
