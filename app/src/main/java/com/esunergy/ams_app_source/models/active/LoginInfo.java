@@ -6,41 +6,27 @@ import com.activeandroid.annotation.Table;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-@Table(name = "LOGIN_TRIPS_INFO")
+@Table(name = "LOGIN_INFO")
 public class LoginInfo extends Model {
-    @Column(name = "USER", unique=true, onUniqueConflict = Column.ConflictAction.REPLACE)
+    @Column(name = "USER", unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
     public String user;  //登入帳號
 
     @Expose
-    @SerializedName("UserName")
-    @Column(name = "UserName")
-    public String userName;
+    @SerializedName("UserNameE")
+    @Column(name = "UserNameE")
+    public String userNameE;
 
     @Expose
-    @SerializedName("TripsTicket")
-    @Column(name = "TripsTicket")
-    public String tripsTicket;
+    @SerializedName("UserNameC")
+    @Column(name = "UserNameC")
+    public String userNameC;
 
     @Expose
-    @SerializedName("OutPlateNO")
-    @Column(name = "OutPlateNO")
-    public String outPlateNo;
+    @SerializedName("Company")
+    @Column(name = "Company")
+    public String userCompany;
 
-    @Expose
-    @SerializedName("TransWOCount")
-    @Column(name = "TransWOCount")
-    public String transWoCount;
-
-    @Expose
-    @SerializedName("SumPackCount")
-    @Column(name = "SumPackCount")
-    public String sumPackCount;
-
-    @Column(name = "MenuMode")
-    public Integer menuMode;
-
-
-    public LoginInfo(){
+    public LoginInfo() {
         super();
     }
 
@@ -48,12 +34,9 @@ public class LoginInfo extends Model {
     public String toString() {
         return "LoginTripInfo{" +
                 "user='" + user + '\'' +
-                ", userName='" + userName + '\'' +
-                ", tripsTicket='" + tripsTicket + '\'' +
-                ", outPlateNo='" + outPlateNo + '\'' +
-                ", transWoCount='" + transWoCount + '\'' +
-                ", sumPackCount='" + sumPackCount + '\'' +
-                ", menuMode='" + menuMode + '\'' +
+                ", userNameC='" + userNameC + '\'' +
+                ", userNameE='" + userNameE + '\'' +
+                ", Company='" + userCompany + '\'' +
                 '}';
     }
 }

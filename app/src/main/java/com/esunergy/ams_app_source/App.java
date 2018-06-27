@@ -4,8 +4,10 @@ import com.activeandroid.ActiveAndroid;
 import com.activeandroid.Cache;
 import com.activeandroid.Configuration;
 import com.activeandroid.app.Application;
-import com.activeandroid.util.SQLiteUtils;
-import com.esunergy.ams_app_source.models.active.Params;
+import com.esunergy.ams_app_source.models.active.EventAction;
+import com.esunergy.ams_app_source.models.active.EventProp;
+import com.esunergy.ams_app_source.models.active.LoginInfo;
+import com.esunergy.ams_app_source.models.active.Param;
 import com.esunergy.ams_app_source.utils.LogUtil;
 import com.securepreferences.SecurePreferences;
 
@@ -15,8 +17,11 @@ public class App extends Application {
     private SecurePreferences mUserPrefs;
 
     public App() {
-        super();
         instance = this;
+
+        if (BuildConfig.DEBUG) {
+            ActiveAndroid.setLoggingEnabled(true);
+        }
     }
 
     public static App get() {
@@ -27,22 +32,23 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         LogUtil.LOGI(PAGE_TAG, "App onCreate!");
-        Configuration dbConfiguration = new Configuration.Builder(this).setDatabaseName("ams_local.db").create();
-        boolean hasVersion4Update = getUserPinBasedSharedPreferences().getBoolean(Constants.version6Key, false);
-        int dbVersion = dbConfiguration.getDatabaseVersion();
-        if (dbVersion >= 6 && (!hasVersion4Update)) {
-            LogUtil.LOGI(PAGE_TAG, "dbVersion =6 , db update!!");
-//            SQLiteUtils.execSql("DROP TABLE IF EXISTS TRIPS_MASTER_CUST");
-//            SQLiteUtils.execSql("DROP TABLE IF EXISTS TRIPS_ITEM_DETAIL");
-//            SQLiteUtils.execSql(SQLiteUtils.createTableDefinition(Cache.getTableInfo(TripsMasterCust.class)));
-//            SQLiteUtils.execSql(SQLiteUtils.createTableDefinition(Cache.getTableInfo(TripsItemDetail.class)));
-            getUserPinBasedSharedPreferences().edit().putBoolean(Constants.version6Key, true).apply();
-        }
+//        Cache.dispose();
 
-        Configuration.Builder configurationBuilder = new Configuration.Builder(this);
-        configurationBuilder.addModelClass(Params.class);
+        Configuration dbConfiguration = new Configuration.Builder(this).setDatabaseName("ams_local.db")
+//                .addModelClass(Param.class)
+//                .addModelClass(LoginInfo.class)
+//                .addModelClass(EventAction.class)
+//                .addModelClass(EventProp.class)
+                .create();
+
+        //Cache.initialize(dbConfiguration);
         ActiveAndroid.initialize(dbConfiguration);
+    }
 
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        ActiveAndroid.dispose();
     }
 
     public SecurePreferences getUserPinBasedSharedPreferences() {

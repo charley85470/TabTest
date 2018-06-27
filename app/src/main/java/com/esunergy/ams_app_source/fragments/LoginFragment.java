@@ -30,7 +30,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
 /**
- * A simple {@link Fragment} subclass.
+ *
  */
 public class LoginFragment extends BaseConnectionFragment implements View.OnTouchListener {
 
@@ -112,13 +112,13 @@ public class LoginFragment extends BaseConnectionFragment implements View.OnTouc
                 LogUtil.LOGI(PAGE_TAG, "LoginInfo = " + response);
                 if (response.statusCode == 200) {
                     try {
-                        loginInfo = gson.fromJson(response.data, LoginInfo.class);
+                        loginInfo = gson.fromJson(response.data.toString(), LoginInfo.class);
                         loginInfo.user = et_account.getText().toString();
 //                        loginInfo.menuMode = MenuFragment.MENU_MODE_STEP1_BeforeDownload;
                         loginInfo.save();
 
-                        LogUtil.LOGI(PAGE_TAG, "LoginTripsInfo = " + loginInfo);
-                        Constants.setLogin(loginInfo.user, loginInfo.userName);
+                        LogUtil.LOGI(PAGE_TAG, "LoginInfo = " + loginInfo);
+                        Constants.setLogin(loginInfo.user, loginInfo.userNameE);
                         toMenuFragment();
                     } catch (JsonSyntaxException e) {
                         e.printStackTrace();

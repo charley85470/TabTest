@@ -19,6 +19,10 @@ allprojects {
     repositories {
         google()
         jcenter()
+
+        // ActiveAndroid
+        //mavenCentral()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
     }
 }
 

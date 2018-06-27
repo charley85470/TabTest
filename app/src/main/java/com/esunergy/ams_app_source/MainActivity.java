@@ -8,6 +8,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.esunergy.ams_app_source.fragments.ActionListFragment;
 import com.esunergy.ams_app_source.fragments.BaseFragment;
 import com.esunergy.ams_app_source.fragments.LoginFragment;
 import com.esunergy.ams_app_source.fragments.MenuFragment;
@@ -60,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
             // 已有權限
             if (Constants.isLogin) {
                 initMenuView();
+                //initActionListView();
             } else {
                 initLoginView();
             }
@@ -68,14 +70,15 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        switch(requestCode) {
+        switch (requestCode) {
             case REQUEST_EXTERNAL_STORAGE:
-                if (grantResults.length > 0&& grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                     //取得權限，進行檔案存取
-                    if (Constants.isLogin){
+                    if (Constants.isLogin) {
                         initMenuView();
-                    }else{
+                        //initActionListView();
+                    } else {
                         initLoginView();
                     }
                 } else {
@@ -92,37 +95,49 @@ public class MainActivity extends AppCompatActivity {
         Constants.userName = App.get().getUserPinBasedSharedPreferences().getString(Constants.userNameKey, "");
     }
 
-    private void initMenuView(){
+    private void initActionListView() {
+        ActionListFragment actionListFragment = new ActionListFragment();
+
+        Bundle bundleArgs = new Bundle();
+        actionListFragment.setArguments(bundleArgs);
+        FragmentManager manager = getFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right);
+        transaction.replace(R.id.fragment_frame, actionListFragment)
+                .commit();
+    }
+
+    private void initMenuView() {
         MenuFragment menuFragment = new MenuFragment();
 
         Bundle bundleArgs = new Bundle();
         menuFragment.setArguments(bundleArgs);
         FragmentManager manager = getFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in_left, 0 ,0 ,R.animator.slide_out_right);
+        transaction.setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right);
         transaction.replace(R.id.fragment_frame, menuFragment)
                 .commit();
     }
 
-    private void initLoginView(){
+    private void initLoginView() {
         LoginFragment loginFragment = new LoginFragment();
 
         Bundle bundleArgs = new Bundle();
         loginFragment.setArguments(bundleArgs);
         FragmentManager manager = getFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in_left, 0 ,0 ,R.animator.slide_out_right);
+        transaction.setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right);
         transaction.replace(R.id.fragment_frame, loginFragment)
                 .commit();
     }
 
-    public void popToMenuFragment(){
+    public void popToMenuFragment() {
         if (getFragmentManager().getBackStackEntryCount() > 0) {
             getFragmentManager().popBackStackImmediate();
             Fragment f = getFragmentManager().findFragmentById(R.id.fragment_frame);
-            if (f instanceof MenuFragment){
+            if (f instanceof MenuFragment) {
                 return;
-            }else{
+            } else {
                 onBackPressed();
                 popToMenuFragment();
             }
@@ -130,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed(){
+    public void onBackPressed() {
         CommHelper.hideKeyBoard(MainActivity.this);
         super.onBackPressed();
     }

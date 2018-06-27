@@ -63,4 +63,6 @@ public abstract class BaseConnectionFragment extends BaseFragment implements Con
             mProgressDialog.dismiss();
         }
     }
+
+
 }

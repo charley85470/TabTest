@@ -7,14 +7,10 @@ import android.content.Intent;
 import com.esunergy.ams_app_source.base.GsonUTCDateAdapter;
 import com.esunergy.ams_app_source.connection.ConnectionManager;
 import com.esunergy.ams_app_source.connection.ConnectionService;
-import com.esunergy.ams_app_source.models.active.Params;
-import com.esunergy.ams_app_source.utils.LogUtil;
+import com.esunergy.ams_app_source.models.active.Param;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -119,9 +115,9 @@ public class DeliveryResultUploadReceiver extends BroadcastReceiver {
 //        }
     }
 
-    private String findMemoNameByCode(List<Params> memoList, String code){
+    private String findMemoNameByCode(List<Param> memoList, String code){
         String rtn = "";
-        for(Params param : memoList){
+        for(Param param : memoList){
             if (param.paraCode.equals(code)){
                 rtn = param.paraName;
                 break;

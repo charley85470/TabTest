@@ -7,12 +7,19 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 @Table(name = "Params")
-public class Params extends Model {
-    @Column(name = "ParaTypeCode", unique=true, onUniqueConflict = Column.ConflictAction.REPLACE)
-    public  String paraTypeCode;
+public class Param extends Model {
+    public enum ParaType { EventStatus, }
+
+    public Param() {
+        super();
+    }
+
+    @Column(name = "ParamsId", unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
+    public String paramsId;
 
     @Column(name = "ParaType")
-    public  String paraType;
+    @SerializedName("ParaType")
+    public String paraType;
 
     @Expose
     @SerializedName("ParaCode")
@@ -31,8 +38,8 @@ public class Params extends Model {
 
     @Override
     public String toString() {
-        return "Params{" +
-                "paraTypeCode='" + paraTypeCode + '\'' +
+        return "Param{" +
+                "paramsId='" + paramsId + '\'' +
                 ", paraType='" + paraType + '\'' +
                 ", paraCode='" + paraCode + '\'' +
                 ", paraName='" + paraName + '\'' +

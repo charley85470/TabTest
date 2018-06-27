@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ams_app_source</string>
+    <string name="app_name">行動管理系統</string>
     <string name="dialog_title_normal">訊息</string>
     <string name="dialog_check_version_loading">版本檢查中…請稍候…</string>
     <string name="internet_error">網路異常，請確認網路流暢後再試。</string>
@@ -15,4 +15,5 @@
     <string name="hint_account">請輸入帳號</string>
     <string name="confirm">確定</string>
     <string name="login_fail">登入失敗</string>
+    <string name="sent">送出</string>
 </resources>

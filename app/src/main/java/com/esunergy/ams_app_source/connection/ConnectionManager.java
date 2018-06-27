@@ -256,7 +256,7 @@ public class ConnectionManager {
             if (showDialog) {
                 closeLoadingDialog();
             }
-            if (result != null && (result.startsWith("Eror:") || result.startsWith("P:"))) {
+            if (result != null && (result.startsWith("Error:") || result.startsWith("P:"))) {
                 listener.onConnectionError(connectionService, result);
             } else if (result != null && !result.equals("")) {
                 listener.onConnectionResponse(connectionService, result);
