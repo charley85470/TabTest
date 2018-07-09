@@ -7,64 +7,60 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.esunergy.ams_app_source.Constants;
 import com.esunergy.ams_app_source.R;
-import com.esunergy.ams_app_source.adapter.ActionListAdapter;
+import com.esunergy.ams_app_source.adapter.EventListAdapter;
 import com.esunergy.ams_app_source.connection.ConnectionService;
-import com.esunergy.ams_app_source.connection.model.vwEventAction;
+import com.esunergy.ams_app_source.connection.model.vwEventMain;
 import com.esunergy.ams_app_source.utils.LogUtil;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ActionListFragment extends BaseConnectionFragment implements View.OnTouchListener {
+public class ActionAddSelectEventFragment extends BaseConnectionFragment {
 
-    private String PAGE_TAG = "ActionListFragment";
+    private String PAGE_TAG = "ActionAddSelectEventFragment";
 
     private Context ctx;
     private View topLayoutView;
+    private RecyclerView rv_event_list;
 
-    private RecyclerView rv_action_list;
+    private EventListAdapter eventListAdapter;
 
-    private ActionListAdapter actionListAdapter;
-    private List<vwEventAction> eventActions;
-    private Date now = Calendar.getInstance().getTime();
+    private List<vwEventMain> eventMains;
 
-    public ActionListFragment() {
+    public ActionAddSelectEventFragment() {
         // Required empty public constructor
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
         ctx = getActivity();
-        topLayoutView = LayoutInflater.from(ctx).inflate(R.layout.fragment_action_list, container, false);
+        topLayoutView = LayoutInflater.from(ctx).inflate(R.layout.fragment_action_add_select_event, container, false);
 
-        rv_action_list = topLayoutView.findViewById(R.id.rv_action_list);
+        rv_event_list = topLayoutView.findViewById(R.id.rv_event_list);
 
         showProgressDialog();
         JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("Company", Constants.userCompany);
         jsonObject.addProperty("DataBy", Constants.account);
-        jsonObject.addProperty("EventActionSDate", now.toString());
-        jsonObject.addProperty("EventActionEDate", now.toString());
         String jsonString = gson.toJson(jsonObject);
-        mConnectionManager.sendPost(ConnectionService.getSortedActions, jsonString, this, false);
+        mConnectionManager.sendPost(ConnectionService.getEvents, jsonString, this, false);
 
         final LinearLayoutManager layoutManager = new LinearLayoutManager(ctx);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        rv_action_list.setLayoutManager(layoutManager);
+        rv_event_list.setLayoutManager(layoutManager);
 
         return topLayoutView;
     }
@@ -74,26 +70,20 @@ public class ActionListFragment extends BaseConnectionFragment implements View.O
         dismissProgressDialog();
 
         switch (service) {
-
-            case getSortedActions: {
+            case getEvents: {
                 LogUtil.LOGI(PAGE_TAG, "EventActions = " + result);
                 try {
-                    eventActions = gson.fromJson(result, new TypeToken<ArrayList<vwEventAction>>() {
+                    eventMains = gson.fromJson(result, new TypeToken<ArrayList<vwEventMain>>() {
                     }.getType());
-                    actionListAdapter = new ActionListAdapter(eventActions)
+                    eventListAdapter = new EventListAdapter(eventMains)
                             .setFragmentManager(getFragmentManager())
                             .setPageTag(PAGE_TAG);
-                    rv_action_list.setAdapter(actionListAdapter);
+                    rv_event_list.setAdapter(eventListAdapter);
                 } catch (JsonSyntaxException e) {
                     e.printStackTrace();
                 }
                 break;
             }
         }
-    }
-
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        return false;
     }
 }

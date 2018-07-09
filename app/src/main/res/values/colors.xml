@@ -17,4 +17,7 @@
     <color name="list_bg_pressed_color">#FF4081</color>
 
     <color name="list_selector_color">#4d90fe</color>
+
+    <color name="text_color_normal">#666</color>
+    <color name="text_color_disabled">#AAA</color>
 </resources>

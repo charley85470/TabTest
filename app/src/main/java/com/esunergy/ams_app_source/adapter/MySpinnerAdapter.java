@@ -13,23 +13,40 @@ import com.esunergy.ams_app_source.models.SelectItem;
 
 import java.util.List;
 
+/**
+ * 下拉式選單Adapter
+ */
 public class MySpinnerAdapter extends BaseAdapter implements android.widget.SpinnerAdapter {
 
     private List<SelectItem> _list;
     private Context _ctx;
 
+    /**
+     * 初始化下拉式選單
+     * @param context Context
+     * @param objects SelectItem Object List
+     */
     public MySpinnerAdapter(Context context, List<SelectItem> objects) {
+        this(context, objects, false);
+    }
+
+    /**
+     * 初始化下拉式選單
+     * @param context Context
+     * @param objects SelectItem Object List
+     * @param hasDefault 是否有初始值(請選擇)
+     */
+    public MySpinnerAdapter(Context context, List<SelectItem> objects, boolean hasDefault) {
         _ctx = context;
         _list = objects;
+
+        if (hasDefault) {
+            _list.add(0, new SelectItem().setText("請選擇").setValue(""));
+        }
     }
 
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
-//        convertView = LayoutInflater.from(_ctx).inflate(R.layout.spinner_item_view, parent, false);
-//        RadioButton rb = convertView.findViewById(R.id.rb_sp_item);
-//        rb.setText(getItem(position).text);
-//        return convertView;
-
         convertView = LayoutInflater.from(_ctx).inflate(R.layout.spinner_item_view, parent, false);
         TextView tv = convertView.findViewById(R.id.tv_sp_item);
         tv.setText(getItem(position).text);
@@ -89,6 +106,11 @@ public class MySpinnerAdapter extends BaseAdapter implements android.widget.Spin
         return _list.isEmpty();
     }
 
+    /**
+     * 以值取得對應的Position
+     * @param value 值
+     * @return int Position
+     */
     public int getPositionByValue(String value) {
         for (int i = 0; i < getCount(); i++) {
             if (value.equals(getItem(i).value)) return i;

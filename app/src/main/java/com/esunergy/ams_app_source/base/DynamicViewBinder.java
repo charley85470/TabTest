@@ -20,6 +20,9 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * 動態欄位功能
+ */
 public class DynamicViewBinder {
     private String CLASS_TAG = "DynamicViewBinder";
 
@@ -27,30 +30,54 @@ public class DynamicViewBinder {
     private LinearLayout _dynamicLayout;
     private Editable _editable;
 
-    HashMap<String, DynamicViewItem> dynamicViewItems = new HashMap();
+    private HashMap<String, DynamicViewItem> dynamicViewItems;
 
     public enum Editable {
-        Default, AllEditable
+        /**
+         * 預設，以Web設定為主
+         */
+        Default,
+        /**
+         * 所有欄位皆可編輯
+         */
+        AllEditable,
+        /**
+         * 所有欄位皆不可編輯
+         */
+        NotEditable
     }
 
+    /**
+     * 初始化
+     *
+     * @param dynamicLayout 動態欄位容器Layout
+     */
     public DynamicViewBinder(LinearLayout dynamicLayout) {
-        this(dynamicLayout, Editable.Default);
-    }
-
-    public DynamicViewBinder(LinearLayout dynamicLayout, Editable editable) {
         _dynamicLayout = dynamicLayout;
         _ctx = dynamicLayout.getContext();
-        _editable = editable;
+        initLayoutView();
     }
 
-    public HashMap<String, DynamicViewItem> initDynamicView(List<ViewTemplate> viewTemplates) {
-
+    /**
+     * 初始化動態欄位物件，以HashMap儲存
+     *
+     * @param viewTemplates 顯示模板
+     * @return HashMap   key=FieldId,. value=ViewObject
+     */
+    public HashMap<String, DynamicViewItem> initDynamicView(List<ViewTemplate> viewTemplates, Editable editable) {
+        _editable = editable;
         for (ViewTemplate viewTemplate :
                 viewTemplates) {
             initItem(viewTemplate);
         }
-
         return dynamicViewItems;
+    }
+
+    public void initLayoutView() {
+        dynamicViewItems = new HashMap<>();
+        _dynamicLayout.removeAllViewsInLayout();
+        _dynamicLayout.requestLayout();
+        _dynamicLayout.invalidate();
     }
 
     public LinearLayout getDynamicLayout() {
@@ -64,87 +91,107 @@ public class DynamicViewBinder {
     /**
      * 依據ViewTemplate所記錄的型態，綁定相對應類型的Widget至DynamicView
      *
-     * @param viewTemplate
+     * @param viewTemplate ViewObject
      */
     private void initItem(ViewTemplate viewTemplate) {
         String _fieldId = viewTemplate.FieldId;
+        DynamicViewItem viewItem;
 
-        if (_editable == Editable.AllEditable || "Y".equals(viewTemplate.EditInApp)) {
+        if (_editable == Editable.AllEditable
+                || (_editable == Editable.Default && "Y".equals(viewTemplate.EditInApp))) {
             switch (viewTemplate.FieldType == null ? "" : viewTemplate.FieldType) {
                 case "TextArea": {
-                    EditText textView = initMultiEditText(viewTemplate.FieldCName);
-                    dynamicViewItems.put(_fieldId, new DynamicViewEditTextItem(_fieldId, textView));
+                    viewItem = initMultiEditText(_fieldId);
                     break;
                 }
                 case "Phone": {
-                    EditText textView = initEditText(viewTemplate.FieldCName);
-                    dynamicViewItems.put(_fieldId, new DynamicViewEditTextItem(_fieldId, textView));
+                    viewItem = initEditText(_fieldId);
                     break;
                 }
                 case "EmailTopic": {
-                    EditText textView = initEditText(viewTemplate.FieldCName);
-                    dynamicViewItems.put(_fieldId, new DynamicViewEditTextItem(_fieldId, textView));
+                    viewItem = initEditText(_fieldId);
                     break;
                 }
                 case "Email": {
-                    EditText textView = initEditText(viewTemplate.FieldCName);
-                    dynamicViewItems.put(_fieldId, new DynamicViewEditTextItem(_fieldId, textView));
+                    viewItem = initEditText(_fieldId);
                     break;
                 }
                 case "EmailCC": {
-                    EditText textView = initEditText(viewTemplate.FieldCName);
-                    dynamicViewItems.put(_fieldId, new DynamicViewEditTextItem(_fieldId, textView));
+                    viewItem = initEditText(_fieldId);
                     break;
                 }
                 case "EmailContent": {
-                    EditText textView = initMultiEditText(viewTemplate.FieldCName);
-                    dynamicViewItems.put(_fieldId, new DynamicViewEditTextItem(_fieldId, textView));
+                    viewItem = initMultiEditText(_fieldId);
                     break;
                 }
                 case "Text":    // 預設為文字類型
                 default: {
-                    EditText textView = initEditText(viewTemplate.FieldCName);
-                    dynamicViewItems.put(_fieldId, new DynamicViewEditTextItem(_fieldId, textView));
+                    viewItem = initEditText(_fieldId);
                     break;
                 }
             }
+            //        if ("Y".equals(viewTemplate.AllowSpeech)) {
+            if (true) {
+                viewItem.setAllowSpeech(true);
+            }
         } else {
-            TextView textView = initTextView(viewTemplate.FieldCName);
-            dynamicViewItems.put(_fieldId, new DynamicViewTextItem(_fieldId, textView));
+            viewItem = initTextView(_fieldId);
+            viewItem.setAllowSpeech(false);
         }
+        viewItem.setFieldName(viewTemplate.FieldCName);
+
+        dynamicViewItems.put(viewTemplate.FieldId, viewItem);
     }
 
-    private TextView initTextView(String fieldName) {
+    /**
+     * 初始化顯示TextView
+     *
+     * @param fieldId 欄位ID
+     * @return ViewObject
+     */
+    private DynamicViewTextItem initTextView(String fieldId) {
         View view = LayoutInflater.from(_ctx).inflate(R.layout.dynamic_layout_item_view_text, _dynamicLayout, false);
         _dynamicLayout.addView(view);
 
-        TextView labelView = view.findViewById(R.id.dliv_text_label);
-        labelView.setText(fieldName);
-
+        TextView labelView = view.findViewById(R.id.dliv_label);
         TextView textView = view.findViewById(R.id.dliv_text_value);
-        return textView;
+        return new DynamicViewTextItem(fieldId, labelView, textView);
     }
 
-    private EditText initEditText(String fieldName) {
+    /**
+     * 初始化一般EditText
+     *
+     * @param fieldId 欄位ID
+     * @return ViewObject
+     */
+    private DynamicViewEditTextItem initEditText(String fieldId) {
         View view = LayoutInflater.from(_ctx).inflate(R.layout.dynamic_layout_item_view_edittext, _dynamicLayout, false);
         _dynamicLayout.addView(view);
 
-        TextView labelView = view.findViewById(R.id.dliv_edtext_label);
-        labelView.setText(fieldName);
-
+        TextView labelView = view.findViewById(R.id.dliv_label);
         EditText editText = view.findViewById(R.id.dliv_edtext_value);
-        return editText;
+        DynamicViewEditTextItem dynamicViewEditTextItem = new DynamicViewEditTextItem(fieldId, labelView, editText);
+        dynamicViewEditTextItem.setAllowSpeech(true);
+
+        return dynamicViewEditTextItem;
     }
 
-    private EditText initMultiEditText(String fieldName) {
+    /**
+     * 初始化多列EditText
+     *
+     * @param fieldId 欄位ID
+     * @return ViewObject
+     */
+    private DynamicViewEditTextItem initMultiEditText(String fieldId) {
         View view = LayoutInflater.from(_ctx).inflate(R.layout.dynamic_layout_item_view_multiedtext, _dynamicLayout, false);
         _dynamicLayout.addView(view);
 
-        TextView labelView = view.findViewById(R.id.dliv_multiedtext_label);
-        labelView.setText(fieldName);
-
+        TextView labelView = view.findViewById(R.id.dliv_label);
         EditText editText = view.findViewById(R.id.dliv_multiedtext_value);
-        return editText;
+        DynamicViewEditTextItem dynamicViewEditTextItem = new DynamicViewEditTextItem(fieldId, labelView, editText);
+        dynamicViewEditTextItem.setAllowSpeech(true);
+
+        return dynamicViewEditTextItem;
     }
 }
 

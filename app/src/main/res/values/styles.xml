@@ -60,6 +60,14 @@
         <item name="android:textColor">@android:color/black</item>
     </style>
 
+    <style name="PageLayoutTheme">
+        <item name="android:background">@color/colorLightGreen</item>
+    </style>
+
+    <style name="RecyclerViewTheme">
+        <item name="android:foreground">?android:attr/selectableItemBackground</item>
+    </style>
+
     <style name="DetailViewLabel">
         <item name="android:textSize">20sp</item>
     </style>

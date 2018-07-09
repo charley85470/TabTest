@@ -44,6 +44,10 @@ public class ViewTemplate {
     @SerializedName("EditInApp")
     public String EditInApp;
 
+    @Expose
+    @SerializedName("AllowSpeech")
+    public String AllowSpeech;
+
     @Override
     public String toString() {
         return "ViewTemplate {" +

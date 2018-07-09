@@ -8,7 +8,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -16,11 +15,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.esunergy.ams_app_source.Constants;
 import com.esunergy.ams_app_source.R;
+import com.esunergy.ams_app_source.base.InitFragmentView;
 import com.esunergy.ams_app_source.connection.ConnectionService;
 import com.esunergy.ams_app_source.connection.model.Response;
 import com.esunergy.ams_app_source.models.active.LoginInfo;
@@ -30,7 +29,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
 /**
- *
+ * 登入頁面
  */
 public class LoginFragment extends BaseConnectionFragment implements View.OnTouchListener {
 
@@ -45,16 +44,18 @@ public class LoginFragment extends BaseConnectionFragment implements View.OnTouc
     private EditText et_account, et_password;
 
     protected Dialog mCheckVersionDialog;
+    private InitFragmentView initFragmentView;
 
     public LoginFragment() {
         // Required empty public constructor
+        initFragmentView = new InitFragmentView(getFragmentManager());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         ctx = getActivity();
-        topLayoutView = LayoutInflater.from(ctx).inflate(R.layout.login_fragment, container, false);
+        topLayoutView = LayoutInflater.from(ctx).inflate(R.layout.fragment_login, container, false);
 
         btn_login = topLayoutView.findViewById(R.id.btn_login);
         btn_cancel = topLayoutView.findViewById(R.id.btn_cancel);
@@ -113,13 +114,14 @@ public class LoginFragment extends BaseConnectionFragment implements View.OnTouc
                 if (response.statusCode == 200) {
                     try {
                         loginInfo = gson.fromJson(response.data.toString(), LoginInfo.class);
-                        loginInfo.user = et_account.getText().toString();
+//                        loginInfo.user = et_account.getText().toString();
 //                        loginInfo.menuMode = MenuFragment.MENU_MODE_STEP1_BeforeDownload;
                         loginInfo.save();
 
                         LogUtil.LOGI(PAGE_TAG, "LoginInfo = " + loginInfo);
-                        Constants.setLogin(loginInfo.user, loginInfo.userNameE);
-                        toMenuFragment();
+                        Constants.setLogin(loginInfo.user, loginInfo.userNameE, loginInfo.userCompany);
+                        initFragmentView.initLoginView();
+                        //toMenuFragment();
                     } catch (JsonSyntaxException e) {
                         e.printStackTrace();
                     }
@@ -131,18 +133,6 @@ public class LoginFragment extends BaseConnectionFragment implements View.OnTouc
         }
     }
 
-    private void toMenuFragment() {
-        MenuFragment menuFragment = new MenuFragment();
-
-        Bundle bundleArgs = new Bundle();
-        menuFragment.setArguments(bundleArgs);
-        FragmentManager manager = getFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right);
-        transaction.replace(R.id.fragment_frame, menuFragment)
-                .commit();
-    }
-
     //檢查帳號密碼輸入空白，輸入空白則setInputTextLayout Error
     private boolean validateLoginEmpty() {
         int accountErrorRes = 0;
@@ -150,6 +140,10 @@ public class LoginFragment extends BaseConnectionFragment implements View.OnTouc
 
         if (TextUtils.isEmpty(et_account.getText())) {
             accountErrorRes = R.string.hint_account;
+        }
+
+        if (TextUtils.isEmpty(et_password.getText())){
+            passwordErrorRes = R.string.hint_password;
         }
 
         setAccountError(accountErrorRes != 0 ? getResources().getString(accountErrorRes) : null);

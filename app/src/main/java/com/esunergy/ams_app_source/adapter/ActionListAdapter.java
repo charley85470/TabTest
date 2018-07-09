@@ -2,6 +2,7 @@ package com.esunergy.ams_app_source.adapter;
 
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,6 +14,7 @@ import com.esunergy.ams_app_source.R;
 import com.esunergy.ams_app_source.base.InitFragmentView;
 import com.esunergy.ams_app_source.connection.model.vwEventAction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.ViewHolder> {
@@ -56,6 +58,19 @@ public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.Vi
         holder.tv_act_item_evntitle.setText(item.Title);
         holder.tv_act_item_evnprop.setText(item.EventPropParamCName);
 
+        if (!"Y".equals(item.Flag)) {
+            holder.tv_act_item_action.setTextColor(ctx.getColor(R.color.text_color_disabled));
+            holder.tv_act_item_acttitle.setTextColor(ctx.getColor(R.color.text_color_disabled));
+            holder.tv_act_item_evntitle.setTextColor(ctx.getColor(R.color.text_color_disabled));
+            holder.tv_act_item_evnprop.setTextColor(ctx.getColor(R.color.text_color_disabled));
+        }
+        else {
+            holder.tv_act_item_action.setTextColor(ctx.getColor(R.color.text_color_normal));
+            holder.tv_act_item_acttitle.setTextColor(ctx.getColor(R.color.text_color_normal));
+            holder.tv_act_item_evntitle.setTextColor(ctx.getColor(R.color.text_color_normal));
+            holder.tv_act_item_evnprop.setTextColor(ctx.getColor(R.color.text_color_normal));
+        }
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -82,12 +97,17 @@ public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.Vi
         return _data.size();
     }
 
-    public ActionListAdapter setPageTag(String PAGE_TAG){
+    public ActionListAdapter setActionList(List<vwEventAction> data) {
+        this._data = data;
+        return this;
+    }
+
+    public ActionListAdapter setPageTag(String PAGE_TAG) {
         this.PAGE_TAG = PAGE_TAG;
         return this;
     }
 
-    public ActionListAdapter setFragmentManager(FragmentManager fm){
+    public ActionListAdapter setFragmentManager(FragmentManager fm) {
         this.fm = fm;
         return this;
     }

@@ -11,16 +11,21 @@ import com.esunergy.ams_app_source.base.GsonUTCDateAdapter;
 import com.esunergy.ams_app_source.utils.CommHelper;
 import com.esunergy.ams_app_source.utils.DialogUtil;
 import com.esunergy.ams_app_source.utils.LogUtil;
+import com.esunergy.ams_app_source.utils.StringUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.temporal.ValueRange;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -89,6 +94,15 @@ public class ConnectionManager {
         mConnectionTask.execute();
     }
 
+    public void sendGet(ConnectionService connectionService, HashMap<String, String> params, ConnectionListener listener, boolean isShowDialog) {
+        StringBuilder paramString = new StringBuilder();
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            paramString.append(entry.getKey() + "=" + entry.getValue());
+            paramString.append("&");
+        }
+
+        sendGet(connectionService, "?" + paramString.toString(), listener, isShowDialog);
+    }
 
     public void sendGet(ConnectionService connectionService, String params, ConnectionListener listener, boolean isShowDialog) {
         mConnectionTask = new ConnectionTask(ConnectionType.GET, connectionService, params, null, listener, isShowDialog);
@@ -194,7 +208,7 @@ public class ConnectionManager {
 
                     InputStream inputStreamObj = (InputStream) conn.getContent();
                     if (inputStreamObj != null) {
-                        result = CommHelper.convertStreamToString(inputStreamObj);
+                        result = StringUtil.convertStreamToString(inputStreamObj);
                         LogUtil.LOGI(TAG, "==========200==Response============");
 
                         if (result.length() > 2000) {
@@ -217,7 +231,7 @@ public class ConnectionManager {
                 } else if (statusCode == 400) {
                     InputStream inputStreamObj = conn.getErrorStream();
                     if (inputStreamObj != null) {
-                        result = CommHelper.convertStreamToString(inputStreamObj);
+                        result = StringUtil.convertStreamToString(inputStreamObj);
                         LogUtil.LOGI(TAG, "==========400==Response============");
                         LogUtil.LOGI(TAG, result);
                         JsonElement jsonElement = new JsonParser().parse(result);
@@ -234,7 +248,7 @@ public class ConnectionManager {
                 } else {
                     InputStream errStream = conn.getErrorStream();
                     if (errStream != null) {
-                        result = CommHelper.convertStreamToString(errStream);
+                        result = StringUtil.convertStreamToString(errStream);
                         LogUtil.LOGI(TAG, "===========errStream=Response============");
                         LogUtil.LOGI(TAG, result);
                     }

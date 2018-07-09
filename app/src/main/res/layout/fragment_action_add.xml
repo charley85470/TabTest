@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:theme="@style/PageLayoutTheme">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -12,7 +13,29 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textView13"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="事件"
+                    android:theme="@style/DetailViewLabel" />
+
+                <TextView
+                    android:id="@+id/tv_event"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="TextView"
+                    android:theme="@style/DetailViewTextView" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -27,13 +50,12 @@
                     android:text="事件類型"
                     android:theme="@style/DetailViewLabel" />
 
-                <TextView
-                    android:id="@+id/tv_event_prop"
+                <Spinner
+                    android:id="@+id/sp_event_prop"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="TextView"
-                    android:theme="@style/DetailViewTextView" />
+                    android:layout_weight="1" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -49,13 +71,12 @@
                     android:text="行動標題"
                     android:theme="@style/DetailViewLabel" />
 
-                <TextView
-                    android:id="@+id/tv_action_title"
+                <Spinner
+                    android:id="@+id/sp_action_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="TextView"
-                    android:theme="@style/DetailViewTextView" />
+                    android:layout_weight="1" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -71,13 +92,12 @@
                     android:text="行動"
                     android:theme="@style/DetailViewLabel" />
 
-                <TextView
-                    android:id="@+id/tv_action"
+                <Spinner
+                    android:id="@+id/sp_action"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="TextView"
-                    android:theme="@style/DetailViewTextView" />
+                    android:layout_weight="1" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -100,13 +120,18 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/tv_datetime_start"
+                    <EditText
+                        android:id="@+id/et_datetime_start"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:imeOptions="actionDone"
+                        android:inputType="none"
                         android:text="1900/01/01 00:00"
-                        android:theme="@style/DetailViewTextView" />
+                        android:theme="@style/DetailViewEditText" />
 
                     <TextView
                         android:id="@+id/textView8"
@@ -117,13 +142,18 @@
                         android:text="～"
                         android:theme="@style/DetailViewTextView" />
 
-                    <TextView
-                        android:id="@+id/tv_datetime_end"
+                    <EditText
+                        android:id="@+id/et_datetime_end"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:ems="10"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:imeOptions="actionDone"
+                        android:inputType="none"
                         android:text="1900/01/01 00:00"
-                        android:theme="@style/DetailViewTextView" />
+                        android:theme="@style/DetailViewEditText" />
 
                 </LinearLayout>
 
@@ -183,6 +213,7 @@
                         android:inputType="none"
                         android:text="1900/01/01 00:00"
                         android:theme="@style/DetailViewEditText" />
+
                 </LinearLayout>
 
             </LinearLayout>
@@ -193,26 +224,6 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/textView4"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="狀態"
-                    android:theme="@style/DetailViewLabel" />
-
-                <Spinner
-                    android:id="@+id/sp_status"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
             </LinearLayout>
 
             <LinearLayout

@@ -23,7 +23,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 /**
- * A simple {@link Fragment} subclass.
+ * 主選單頁面
  */
 public class MenuFragment extends BaseConnectionFragment implements View.OnTouchListener, View.OnClickListener {
     private String PAGE_TAG = "MenuFragment";
@@ -31,7 +31,7 @@ public class MenuFragment extends BaseConnectionFragment implements View.OnTouch
     private Context ctx;
     private View topLayoutView;
 
-    private Button btn_action_list;
+    private Button btn_add_action, btn_action_list, btn_speech_test;
 
     private InitFragmentView initFragmentView;
 
@@ -45,9 +45,11 @@ public class MenuFragment extends BaseConnectionFragment implements View.OnTouch
 
 
         ctx = getActivity();
-        topLayoutView = LayoutInflater.from(ctx).inflate(R.layout.menu_fragment, container, false);
+        topLayoutView = LayoutInflater.from(ctx).inflate(R.layout.fragment_menu, container, false);
 
+        btn_add_action = topLayoutView.findViewById(R.id.btn_add_action);
         btn_action_list = topLayoutView.findViewById(R.id.btn_action_list);
+        btn_speech_test = topLayoutView.findViewById(R.id.btn_speech_test);
 
         initFragmentView = new InitFragmentView(getFragmentManager());
 
@@ -61,7 +63,9 @@ public class MenuFragment extends BaseConnectionFragment implements View.OnTouch
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        btn_add_action.setOnClickListener(this);
         btn_action_list.setOnClickListener(this);
+        btn_speech_test.setOnClickListener(this);
     }
 
     @Override
@@ -110,8 +114,16 @@ public class MenuFragment extends BaseConnectionFragment implements View.OnTouch
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.btn_add_action: {
+                initFragmentView.addToBackStack(PAGE_TAG).initActionAddSelectEventView();
+                break;
+            }
             case R.id.btn_action_list: {
                 initFragmentView.addToBackStack(PAGE_TAG).initActionListView();
+                break;
+            }
+            case R.id.btn_speech_test: {
+                initFragmentView.addToBackStack(PAGE_TAG).initSpeechTestView();
                 break;
             }
         }

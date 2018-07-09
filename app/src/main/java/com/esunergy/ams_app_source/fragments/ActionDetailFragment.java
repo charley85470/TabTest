@@ -4,22 +4,27 @@ package com.esunergy.ams_app_source.fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.esunergy.ams_app_source.BuildConfig;
+import com.esunergy.ams_app_source.Constants;
 import com.esunergy.ams_app_source.R;
 import com.esunergy.ams_app_source.adapter.MySpinnerAdapter;
 import com.esunergy.ams_app_source.base.DynamicViewBinder;
+import com.esunergy.ams_app_source.base.SpeechRecognitionManager;
 import com.esunergy.ams_app_source.base.dynamicviewitem.DynamicViewItem;
 import com.esunergy.ams_app_source.connection.ConnectionService;
 import com.esunergy.ams_app_source.connection.model.ViewTemplate;
@@ -28,6 +33,7 @@ import com.esunergy.ams_app_source.models.active.EventAction;
 import com.esunergy.ams_app_source.models.active.Param;
 import com.esunergy.ams_app_source.models.dao.ParamsDao;
 import com.esunergy.ams_app_source.utils.LogUtil;
+import com.esunergy.ams_app_source.utils.StringUtil;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
@@ -37,16 +43,19 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * A simple {@link Fragment} subclass.
+ * 行動細項編輯頁面
  */
-public class ActionDetailFragment extends BaseConnectionFragment implements View.OnTouchListener, View.OnClickListener, DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
+public class ActionDetailFragment extends BaseConnectionFragment implements View.OnTouchListener, View.OnClickListener,
+        DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
 
     private String PAGE_TAG = "ActionDetailFragment";
+    private final String END_STATUS_FLAG = "E";   // 結案狀態Flag
 
     private Context ctx;
     private View topLayoutView;
@@ -55,29 +64,32 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
     private TextView tv_datetime_start, tv_datetime_end, tv_event_prop, tv_action_title, tv_action;
     private EditText et_real_datetime_start, et_real_datetime_end;
     private Spinner sp_status;
+    private Switch sw_speech_listen;
 
     private EventAction eventAction;
     private HashMap<String, DynamicViewItem> dynamicViewItems;
-    private Calendar startCalendar, endCalendar;
+    private Calendar calendar;
+    private SpeechRecognitionManager speechManager;
+    private HashMap<String, String> speechRecoFields;
 
     private SimpleDateFormat sdf;
 
     public ActionDetailFragment() {
         // Required empty public constructor
+        speechRecoFields = new HashMap<>();
+        dynamicViewItems = new HashMap<>();
+        sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        dynamicViewItems = new HashMap();
-        sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-
         Bundle bundle = getArguments();
         long eventActionSn = bundle.getLong("EventActionSn");
         mConnectionManager.sendGet(ConnectionService.getAction, "/" + eventActionSn, ActionDetailFragment.this, false);
 
         ctx = container.getContext();
-        topLayoutView = LayoutInflater.from(ctx).inflate(R.layout.action_detail_fragment, container, false);
+        topLayoutView = LayoutInflater.from(ctx).inflate(R.layout.fragment_action_detail, container, false);
         dynamicViewLayout = topLayoutView.findViewById(R.id.dynamic_view_layout);
         tv_event_prop = topLayoutView.findViewById(R.id.tv_event_prop);
         tv_action_title = topLayoutView.findViewById(R.id.tv_action_title);
@@ -89,9 +101,12 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
         btn_sent = topLayoutView.findViewById(R.id.btn_sent);
         btn_cancel = topLayoutView.findViewById(R.id.btn_cancel);
         sp_status = topLayoutView.findViewById(R.id.sp_status);
+        sw_speech_listen = topLayoutView.findViewById(R.id.sw_speech_listen);
 
         setAdapter();
         setListener();
+
+        speechManager = SpeechRecognitionManager.getInstance(ctx);
 
         return topLayoutView;
     }
@@ -116,6 +131,19 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
         btn_cancel.setOnClickListener(this);
         et_real_datetime_start.setOnClickListener(this);
         et_real_datetime_end.setOnClickListener(this);
+
+        sw_speech_listen.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    speechManager.startListening();
+                } else {
+                    speechManager.stopListening();
+                }
+            }
+        });
+
+        speechManager.setSpeechListener(speechListener);
     }
 
     private void bindView() {
@@ -153,6 +181,12 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
         // Flag
         int pstFlag = ((MySpinnerAdapter) sp_status.getAdapter()).getPositionByValue(eventAction.Flag);
         sp_status.setSelection(pstFlag);
+
+        // 已結案，不可再送出編輯
+        if (END_STATUS_FLAG.equals(eventAction.Flag)) {
+            sp_status.setEnabled(false);
+            btn_sent.setEnabled(false);
+        }
     }
 
     private void bindModel() {
@@ -182,25 +216,19 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
         }
 
         eventAction.Flag = ((SelectItem) sp_status.getSelectedItem()).value;
+        eventAction.UpdateBy = Constants.account;
     }
 
-    private void showDatePicker(String tag) {
-        Calendar now = Calendar.getInstance();
-        DatePickerDialog dpd = DatePickerDialog.newInstance(
-                ActionDetailFragment.this,
-                now.get(Calendar.YEAR),
-                now.get(Calendar.MONTH),
-                now.get(Calendar.DAY_OF_MONTH)
-        );
-        dpd.show(getFragmentManager(), tag);
-    }
-
-    private void showTimePicker(String tag) {
-        Calendar now = Calendar.getInstance();
-        TimePickerDialog tpd = TimePickerDialog.newInstance(ActionDetailFragment.this,
-                now.get(Calendar.HOUR_OF_DAY), now.get(Calendar.MINUTE), false);
-        tpd.setVersion(TimePickerDialog.Version.VERSION_1);
-        tpd.show(getFragmentManager(), tag);
+    /**
+     * 設定支援語音辨識欄位(key=欄位顯示名稱, value=欄位對應ID)
+     */
+    private void bindSpeechRecognitionFields() {
+        for (Map.Entry<String, DynamicViewItem> entry : dynamicViewItems.entrySet()) {
+            DynamicViewItem item = entry.getValue();
+            if (item.isAllowSpeech()) {
+                speechRecoFields.put(item.getFieldName(), entry.getKey());
+            }
+        }
     }
 
     @Override
@@ -227,14 +255,20 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
 
                 // Init Dynamic View
                 DynamicViewBinder binder = new DynamicViewBinder(dynamicViewLayout);
-                dynamicViewItems = binder.initDynamicView(viewTemplates);
+                if (END_STATUS_FLAG.equals(eventAction.Flag)) {
+                    // 已結案
+                    dynamicViewItems = binder.initDynamicView(viewTemplates, DynamicViewBinder.Editable.NotEditable);
+                } else {
+                    dynamicViewItems = binder.initDynamicView(viewTemplates, DynamicViewBinder.Editable.Default);
+                }
 
                 bindView();
                 bindModel();
+                bindSpeechRecognitionFields();
                 break;
             }
 
-            case putAction: {
+            case updateAction: {
                 Toast.makeText(ctx, "資料更新成功", Toast.LENGTH_SHORT).show();
 
                 getFragmentManager().popBackStack();
@@ -251,45 +285,50 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_sent: {
-                bindModel();
-
-                // 更新行動
-                String jsonStr = gson.toJson(eventAction);
-                mConnectionManager.sendPut(ConnectionService.putAction, "/" + eventAction.EventActionSn, jsonStr, ActionDetailFragment.this, false);
+                sentActionForm();
                 break;
             }
             case R.id.btn_cancel: {
                 getFragmentManager().popBackStack();
                 break;
             }
-            case R.id.et_real_datetime_start: {
-                startCalendar = Calendar.getInstance();
-                showDatePicker("et_real_datetime_start");
-                break;
-            }
+            case R.id.et_real_datetime_start:
             case R.id.et_real_datetime_end: {
-                endCalendar = Calendar.getInstance();
-                showDatePicker("et_real_datetime_end");
+                calendar = Calendar.getInstance();
+                calendar.setTime(parseDate(((EditText) v).getText().toString()));
+
+                if (v.getId() == R.id.et_real_datetime_start)
+                    showDatePicker("et_real_datetime_start");
+                else if (v.getId() == R.id.et_real_datetime_end)
+                    showDatePicker("et_real_datetime_end");
                 break;
             }
         }
     }
 
-    @Override
-    public void onDateSet(final DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
+    private void sentActionForm() {
+        bindModel();
 
-        final String tag = view.getTag();
-        switch (view.getTag()) {
-            case "et_real_datetime_start": {
-                startCalendar.set(year, monthOfYear, dayOfMonth);
-                break;
-            }
-            case "et_real_datetime_end": {
-                endCalendar.set(year, monthOfYear, dayOfMonth);
-                break;
+        // 更新行動
+        String jsonStr = gson.toJson(eventAction);
+        mConnectionManager.sendPut(ConnectionService.updateAction, "/" + eventAction.EventActionSn, jsonStr, ActionDetailFragment.this, false);
+    }
+
+    private Date parseDate(String dateString) {
+        if (!dateString.isEmpty()) {
+            try {
+                return sdf.parse(dateString);
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
         }
+        return Calendar.getInstance().getTime();
+    }
 
+    @Override
+    public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
+        final String tag = view.getTag();
+        calendar.set(year, monthOfYear, dayOfMonth);
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -300,22 +339,101 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
 
     @Override
     public void onTimeSet(TimePickerDialog view, int hourOfDay, int minute, int second) {
-
+        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+        calendar.set(Calendar.MINUTE, minute);
+        String datetimeStr = sdf.format(calendar.getTime());
         switch (view.getTag()) {
             case "et_real_datetime_start": {
-                startCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                startCalendar.set(Calendar.MINUTE, minute);
-                String datetimeStr = sdf.format(startCalendar.getTime());
                 et_real_datetime_start.setText(datetimeStr);
                 break;
             }
             case "et_real_datetime_end": {
-                endCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                endCalendar.set(Calendar.MINUTE, minute);
-                String datetimeStr = sdf.format(endCalendar.getTime());
                 et_real_datetime_end.setText(datetimeStr);
                 break;
             }
         }
     }
+
+    private void showDatePicker(String tag) {
+        DatePickerDialog dpd = DatePickerDialog.newInstance(
+                ActionDetailFragment.this,
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+        );
+        dpd.show(getFragmentManager(), tag);
+    }
+
+    private void showTimePicker(String tag) {
+        TimePickerDialog tpd = TimePickerDialog.newInstance(ActionDetailFragment.this,
+                calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false);
+        tpd.setVersion(TimePickerDialog.Version.VERSION_1);
+        tpd.show(getFragmentManager(), tag);
+    }
+
+    private SpeechRecognitionManager.SpeechListener speechListener = new SpeechRecognitionManager.SpeechListener() {
+        private boolean isInput = false;
+        private String inputFieldId;
+
+        @Override
+        public void onBeginningOfSpeech() {
+
+        }
+
+        @Override
+        public void onSpeechResults(ArrayList<String> results) {
+            if (BuildConfig.DEBUG) {
+                StringBuilder text = new StringBuilder();
+                for (String result : results) {
+                    text.append(result).append("\n");
+                }
+                Toast.makeText(ctx, text.toString(), Toast.LENGTH_LONG).show();
+            }
+
+            if (!isInput) {
+                // 狀態一： isInput == false
+                if (results.contains("輸入")) {
+                    // 辨識結果為"輸入"，將 isInput 改為true(輸入中)
+                    isInput = true;
+                } else if (results.contains("送出")) {
+                    // 辨識節果為"送出"，將表單送出
+                    isInput = false;
+                    sentActionForm();
+                }
+            } else if (StringUtil.isNullOrEmpty(inputFieldId)) {
+                // 狀態二： isInput == true 且 inputFieldId is empty
+                // 動作  ： 若語音辨識結果包含可輸入的欄位，將其欄位ID寫入 inputFieldId 暫存，否則不做任何動作等待下次辨識
+                for (String result :
+                        results) {
+                    String fieldIdMap = speechRecoFields.get(result);   // 以辨識後的字串取得對應的欄位ID
+                    if (!StringUtil.isNullOrEmpty(fieldIdMap)) {
+                        inputFieldId = fieldIdMap;
+                        break;
+                    }
+                }
+
+                if (StringUtil.isNullOrEmpty(inputFieldId)) {
+                    // 提示訊息：查無此欄位
+                    Toast.makeText(ctx, "提示訊息：查無此欄位", Toast.LENGTH_SHORT).show();
+                }
+            } else if (!StringUtil.isNullOrEmpty(inputFieldId)) {
+                // 狀態三： isInput == true 且 inputFieldId isn't empty
+                // 動作  ： 將語音辨識結果寫入欄位，並清除狀態(isInput, inputFieldId)
+                DynamicViewItem item = dynamicViewItems.get(inputFieldId);
+                if (item != null) {
+                    item.setValue(results.get(0));  // 只以第一筆辨識為最佳解
+                } else {
+                    // 提示訊息：欄位辨識錯誤，請重新辨識
+                    Toast.makeText(ctx, "提示訊息：欄位辨識錯誤，請重新辨識", Toast.LENGTH_SHORT).show();
+                }
+                isInput = false;
+                inputFieldId = "";
+            }
+        }
+
+        @Override
+        public void onSpeechError(int error) {
+
+        }
+    };
 }

@@ -17,7 +17,7 @@ android {
         def LOG_ENABLE = "logTRUE"
         buildConfigField 'String', 'LOG_ENABLE', toJavaCodeString(LOG_ENABLE)
 
-        def SERVER_BASE_URL = "http://118.163.87.193/"
+        def SERVER_BASE_URL = "http://118.163.87.193/AMS_API/"
         buildConfigField 'String', 'SERVER_BASE_URL', toJavaCodeString(SERVER_BASE_URL)
     }
     buildTypes {
@@ -46,4 +46,10 @@ dependencies {
     implementation 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
     implementation 'com.scottyab:secure-preferences-lib:0.1.4'
     implementation 'com.wdullaer:materialdatetimepicker:3.6.1'
+
+    // google
+//    implementation 'com.google.api-client:google-api-client-android:1.23.0'
+//    implementation 'com.google.apis:google-api-services-speech:v1-rev51-1.23.0'
+//    implementation 'com.google.apis:google-api-services-language:v1-rev434-1.23.0'
+//    implementation 'com.google.code.findbugs:jsr305:3.0.2'
 }

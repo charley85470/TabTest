@@ -6,17 +6,26 @@ public enum ConnectionService {
 
     login("/api/Login"),
 
+    // 事件
+    getEvents("api/EventMain/GetEvents"),
+
+    // 事件類型
+    getProps("/api/EventProp/GetProps"),
+    getPropViewTemplate("/api/EventProp/GetViewTemplate"),
+
     // 行動
     getAction("/api/EventAction/GetAction"),
     getActions("/api/EventAction/GetActions"),
+    getSortedActions("/api/EventAction/GetSortedActions"),
+    addAction("/api/EventAction/AddAction/"),
+    updateAction("/api/EventAction/UpdateAction/"),
     getActionViewTemplate("/api/EventAction/GetViewTemplate"),
-    putAction("/api/EventAction/UpdateAction/"),
-
-    // 事件類型
-    getEventPropViewTemplate("/api/EventProp/GetViewTemplate"),
 
     // 參數
     getEventStatusParams("/api/Parameter/GetEventStatusParams"),
+    getEventPropParams("/api/Parameter/GetEventPropParams"),
+    getActionTitleParams("/api/Parameter/GetActionTitleParams"),
+    getEventActionParams("/api/Parameter/GetEventActionParams"),
 
 
     sleepTenSecs("/api/Values/Sleep"),

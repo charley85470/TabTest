@@ -5,8 +5,20 @@
     android:orientation="vertical">
 
     <Button
+        android:id="@+id/btn_add_action"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="新增行動" />
+
+    <Button
         android:id="@+id/btn_action_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="行動清單" />
+
+    <Button
+        android:id="@+id/btn_speech_test"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SpeechTest" />
 </LinearLayout>

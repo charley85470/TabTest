@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:theme="@style/PageLayoutTheme">
 
     <TextView
         android:id="@+id/textView2"
@@ -22,6 +23,7 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_action_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:theme="@style/RecyclerViewTheme" />
 
 </LinearLayout>
