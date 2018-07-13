@@ -69,7 +69,7 @@ public class ActionListFragment extends BaseConnectionFragment implements View.O
         String jsonString = gson.toJson(jsonObject);
         mConnectionManager.sendPost(ConnectionService.getSortedActions, jsonString, this, false);
 
-
+        sp_event_list.setOnItemSelectedListener(onItemSelectedListener);
 
         return topLayoutView;
     }
@@ -105,8 +105,6 @@ public class ActionListFragment extends BaseConnectionFragment implements View.O
                     }
                     mySpinnerAdapter = new MySpinnerAdapter(ctx, selectItems, true);
                     sp_event_list.setAdapter(mySpinnerAdapter);
-
-                    sp_event_list.setOnItemSelectedListener(onItemSelectedListener);
                 } catch (JsonSyntaxException e) {
                     e.printStackTrace();
                 }
