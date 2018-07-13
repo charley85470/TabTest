@@ -1,5 +1,8 @@
 package com.esunergy.ams_app_source.utils;
 
+import android.location.Location;
+import android.support.annotation.NonNull;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,5 +97,10 @@ public class StringUtil {
 
     public static boolean isNullOrEmpty(String str) {
         return !(str != null && !str.isEmpty());
+    }
+
+    @NonNull
+    public static String getLatLngString(Location location) {
+        return location.getLatitude() + "," + location.getLongitude();
     }
 }

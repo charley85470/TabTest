@@ -2,42 +2,35 @@ package com.esunergy.ams_app_source.adapter;
 
 import android.app.FragmentManager;
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import com.esunergy.ams_app_source.R;
 import com.esunergy.ams_app_source.base.InitFragmentView;
 import com.esunergy.ams_app_source.connection.model.vwEventAction;
+import com.esunergy.ams_app_source.models.active.Param;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.ViewHolder> {
+public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.ViewHolder> implements Filterable {
 
     private String PAGE_TAG;
-    private List<vwEventAction> _data;
+    private List<vwEventAction> originData; // 原始資料
+    private List<vwEventAction> mData;  // 篩選後資料
     private Context ctx;
     private FragmentManager fm;
+    private MyFilter mFilter;
 
-    public ActionListAdapter(List<vwEventAction> data) {
-        _data = data;
-    }
-
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView tv_act_item_action, tv_act_item_acttitle, tv_act_item_evntitle, tv_act_item_evnprop;
-
-        public ViewHolder(View itemView) {
-            super(itemView);
-            tv_act_item_action = itemView.findViewById(R.id.tv_act_item_action);
-            tv_act_item_acttitle = itemView.findViewById(R.id.tv_act_item_acttitle);
-            tv_act_item_evntitle = itemView.findViewById(R.id.tv_act_item_evntitle);
-            tv_act_item_evnprop = itemView.findViewById(R.id.tv_act_item_evnprop);
-        }
+    public ActionListAdapter() {
+        originData = new ArrayList<>();
+        mData = new ArrayList<>();
     }
 
     @Override
@@ -52,7 +45,7 @@ public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.Vi
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        final vwEventAction item = _data.get(position);
+        final vwEventAction item = mData.get(position);
         holder.tv_act_item_action.setText(item.EventActionParamCName);
         holder.tv_act_item_acttitle.setText(item.EventActionTitleCName);
         holder.tv_act_item_evntitle.setText(item.Title);
@@ -63,8 +56,7 @@ public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.Vi
             holder.tv_act_item_acttitle.setTextColor(ctx.getColor(R.color.text_color_disabled));
             holder.tv_act_item_evntitle.setTextColor(ctx.getColor(R.color.text_color_disabled));
             holder.tv_act_item_evnprop.setTextColor(ctx.getColor(R.color.text_color_disabled));
-        }
-        else {
+        } else {
             holder.tv_act_item_action.setTextColor(ctx.getColor(R.color.text_color_normal));
             holder.tv_act_item_acttitle.setTextColor(ctx.getColor(R.color.text_color_normal));
             holder.tv_act_item_evntitle.setTextColor(ctx.getColor(R.color.text_color_normal));
@@ -94,11 +86,14 @@ public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.Vi
 
     @Override
     public int getItemCount() {
-        return _data.size();
+        return mData.size();
     }
 
-    public ActionListAdapter setActionList(List<vwEventAction> data) {
-        this._data = data;
+    public ActionListAdapter setData(List<vwEventAction> data) {
+        this.originData = data;
+        this.mData.clear();
+        this.mData.addAll(originData);
+
         return this;
     }
 
@@ -110,5 +105,56 @@ public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.Vi
     public ActionListAdapter setFragmentManager(FragmentManager fm) {
         this.fm = fm;
         return this;
+    }
+
+    @Override
+    public Filter getFilter() {
+        return mFilter == null ? new MyFilter() : mFilter;
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        public TextView tv_act_item_action, tv_act_item_acttitle, tv_act_item_evntitle, tv_act_item_evnprop;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            tv_act_item_action = itemView.findViewById(R.id.tv_act_item_action);
+            tv_act_item_acttitle = itemView.findViewById(R.id.tv_act_item_acttitle);
+            tv_act_item_evntitle = itemView.findViewById(R.id.tv_act_item_evntitle);
+            tv_act_item_evnprop = itemView.findViewById(R.id.tv_act_item_evnprop);
+        }
+    }
+
+    private class MyFilter extends Filter {
+
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<vwEventAction> filteredData = new ArrayList<>();
+            if (constraint != null && !constraint.toString().isEmpty()) {
+                for (vwEventAction ea :
+                        originData) {
+                    if (ea.EventId.equals(constraint)) {
+                        filteredData.add(ea);
+                    }
+                }
+            } else {
+                filteredData.clear();
+                filteredData.addAll(originData);
+            }
+            FilterResults filterResults = new FilterResults();
+            filterResults.count = filteredData.size();
+            filterResults.values = filteredData;
+
+            return filterResults;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            try {
+                mData.clear();
+                mData = (ArrayList<vwEventAction>) results.values;
+            } finally {
+                notifyDataSetChanged();
+            }
+        }
     }
 }

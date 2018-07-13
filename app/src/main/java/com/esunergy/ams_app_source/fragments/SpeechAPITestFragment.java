@@ -1,14 +1,16 @@
 package com.esunergy.ams_app_source.fragments;
 
-
+import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
-import android.speech.RecognitionListener;
-import android.speech.RecognizerIntent;
+import android.os.Looper;
 import android.speech.SpeechRecognizer;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,14 +20,21 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.esunergy.ams_app_source.R;
+import com.esunergy.ams_app_source.base.LocationManager;
 import com.esunergy.ams_app_source.base.SpeechRecognitionManager;
-
-import java.util.ArrayList;
+import com.esunergy.ams_app_source.utils.LogUtil;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class SpeechAPITestFragment extends BaseFragment implements SpeechRecognitionManager.SpeechListener {
+public class SpeechAPITestFragment extends BaseFragment implements LocationManager.LocationListener {
 
     private String LOG_TAG = "Speech";
     private Context ctx;
@@ -35,7 +44,7 @@ public class SpeechAPITestFragment extends BaseFragment implements SpeechRecogni
     private Switch aSwitch;
     private SpeechRecognitionManager manager;
 
-    Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+    private GoogleApiClient googleApiClient;
 
     public SpeechAPITestFragment() {
         // Required empty public constructor
@@ -54,7 +63,7 @@ public class SpeechAPITestFragment extends BaseFragment implements SpeechRecogni
         stop = topLayoutView.findViewById(R.id.stop);
         aSwitch = topLayoutView.findViewById(R.id.switch1);
 
-        manager = SpeechRecognitionManager.getInstance(ctx).initSpeechRecognizer(SpeechAPITestFragment.this);
+        manager = SpeechRecognitionManager.getInstance(ctx);
 
         aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -67,24 +76,15 @@ public class SpeechAPITestFragment extends BaseFragment implements SpeechRecogni
             }
         });
 
+        LocationManager lctManager = LocationManager.getInstance(ctx);
+        lctManager.init().setLocationListener(this);
+
+
         return topLayoutView;
     }
 
     @Override
-    public void onSpeechError(int error) {
-    }
-
-    @Override
-    public void onBeginningOfSpeech() {
-
-    }
-
-    @Override
-    public void onSpeechResults(ArrayList<String> results) {
-        String text = "";
-        for (String result : results) {
-            text += result + "\n";
-        }
-        Toast.makeText(ctx, text, Toast.LENGTH_LONG).show();
+    public void onLocationResult(LocationResult locationResult) {
+        LogUtil.LOGI(LOG_TAG, locationResult.getLastLocation().getLatitude() + " " + locationResult.getLastLocation().getLongitude());
     }
 }

@@ -25,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_EXTERNAL_STORAGE = 1102;
     private static final int RECORD_AUDIO = 1103;
     private static final int INTERNET = 1103;
+    private static final int ACCESS_COARSE_LOCATION = 1104;
+    private static final int ACCESS_FINE_LOCATION = 1105;
     private InitFragmentView initFragmentView;
 
     @Override
@@ -59,11 +61,15 @@ public class MainActivity extends AppCompatActivity {
     private void checkPermission() {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_AUDIO);
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET}, INTERNET);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, ACCESS_COARSE_LOCATION);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION);
 
 
         int permission = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
         int permission2 = ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO);
         int permission3 = ActivityCompat.checkSelfPermission(this, Manifest.permission.INTERNET);
+        int permission4 = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
+        int permission5 = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         if (permission != PackageManager.PERMISSION_GRANTED) {
             //未取得權限，向使用者要求允許權限
             ActivityCompat.requestPermissions(

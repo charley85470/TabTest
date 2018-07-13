@@ -13,4 +13,10 @@ public class SelectItem {
         this.value = value;
         return this;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        SelectItem sl = obj instanceof SelectItem ? ((SelectItem) obj) : null;
+        return sl != null && this.value.equals(sl.value);
+    }
 }

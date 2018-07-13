@@ -280,6 +280,11 @@ public class EventAction extends Model {
     @Column(name = "UpdateBy")
     public String UpdateBy;
 
+    @Expose
+    @SerializedName("UploadLatLng")
+    @Column(name = "UploadLatLng")
+    public String UploadLatLng;
+
     @Override
     public String toString() {
         return "EventAction{" +
@@ -337,6 +342,7 @@ public class EventAction extends Model {
                 " ,EventAction018=" + EventAction018 + '\'' +
                 " ,EventAction019=" + EventAction019 + '\'' +
                 " ,EventAction020=" + EventAction020 + '\'' +
+                " ,UploadLatLng=" + UploadLatLng + '\'' +
                 '}';
     }
 }

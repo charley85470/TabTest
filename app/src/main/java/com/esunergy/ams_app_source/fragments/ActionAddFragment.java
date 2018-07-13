@@ -3,9 +3,7 @@ package com.esunergy.ams_app_source.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +13,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.esunergy.ams_app_source.BuildConfig;
@@ -31,25 +28,20 @@ import com.esunergy.ams_app_source.connection.model.vwEventProp;
 import com.esunergy.ams_app_source.models.SelectItem;
 import com.esunergy.ams_app_source.models.active.EventAction;
 import com.esunergy.ams_app_source.models.active.Param;
-import com.esunergy.ams_app_source.utils.CommHelper;
 import com.esunergy.ams_app_source.utils.LogUtil;
 import com.esunergy.ams_app_source.utils.StringUtil;
-import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
 /**
  * 新增行動頁面
@@ -80,7 +72,6 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
         dynamicViewItems = new HashMap<>();
         sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -118,6 +109,12 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
         speechManager = SpeechRecognitionManager.getInstance(ctx);
 
         return topLayoutView;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        speechManager.stopListening();
     }
 
     @Override

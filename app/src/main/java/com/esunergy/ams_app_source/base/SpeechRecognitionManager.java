@@ -7,7 +7,6 @@ import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 
-import com.activeandroid.util.Log;
 import com.esunergy.ams_app_source.utils.LogUtil;
 
 import java.util.ArrayList;
@@ -16,21 +15,21 @@ public class SpeechRecognitionManager {
 
     private String LOG_TAG = "SpeechRecognitionManager";
     private static SpeechRecognitionManager instance;
-    private MyRecognitionListener listener;
-    private Context ctx;
-    private SpeechRecognizer speech;
-    private Intent speechIntent;
-    private SpeechListener speechListener;
+    private MyRecognitionListener mRgnListener;
+    private Context mContext;
+    private SpeechRecognizer mSphRecognizer;
+    private Intent mSphIntent;
+    private SpeechListener mSphListener;
     private boolean isExecuting = false;    // 用於辨識是否已關閉此功能，若無則會持續進行語音監聽
 
     private SpeechRecognitionManager() {
-        listener = new MyRecognitionListener();
+        mRgnListener = new MyRecognitionListener();
 
-        speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        speechIntent.putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE, "zh-TW");
-        speechIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getClass().getPackage().getName());
-        speechIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
+        mSphIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        mSphIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        mSphIntent.putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE, "zh-TW");
+        mSphIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getClass().getPackage().getName());
+        mSphIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
     }
 
     public static SpeechRecognitionManager getInstance(Context ctx) {
@@ -41,26 +40,29 @@ public class SpeechRecognitionManager {
         return instance;
     }
 
-    public void setSpeechListener(SpeechListener speechListener) {
-        this.speechListener = speechListener;
+    public SpeechRecognitionManager setSpeechListener(SpeechListener mSpeechLst) {
+        this.mSphListener = mSpeechLst;
+        return this;
     }
 
     public void setContext(Context ctx) {
-        this.ctx = ctx;
+        this.mContext = ctx;
     }
 
     public void startListening() {
         isExecuting = true;
-        speech = SpeechRecognizer.createSpeechRecognizer(ctx);
-        speech.setRecognitionListener(listener);
-        speech.startListening(speechIntent);
+        mSphRecognizer = SpeechRecognizer.createSpeechRecognizer(mContext);
+        mSphRecognizer.setRecognitionListener(mRgnListener);
+        mSphRecognizer.startListening(mSphIntent);
     }
 
     public void stopListening() {
         isExecuting = false;
-        speech.stopListening();
-        speech.cancel();
-        speech.destroy();
+        if (mSphRecognizer != null) {
+            mSphRecognizer.stopListening();
+            mSphRecognizer.cancel();
+            mSphRecognizer.destroy();
+        }
     }
 
     class MyRecognitionListener implements RecognitionListener {
@@ -72,7 +74,7 @@ public class SpeechRecognitionManager {
         @Override
         public void onBeginningOfSpeech() {
             LogUtil.LOGD(LOG_TAG, "onBeginningOfSpeech");
-            speechListener.onBeginningOfSpeech();
+            mSphListener.onBeginningOfSpeech();
         }
 
         @Override
@@ -94,10 +96,10 @@ public class SpeechRecognitionManager {
         public void onError(int error) {
             String errorMessage = getErrorText(error);
             LogUtil.LOGD(LOG_TAG, "FAILED " + errorMessage);
-            speechListener.onSpeechError(error);
+            mSphListener.onSpeechError(error);
 
             if (error != SpeechRecognizer.ERROR_CLIENT && error != SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS) {
-                speech.startListening(speechIntent);
+                mSphRecognizer.startListening(mSphIntent);
             }
         }
 
@@ -115,10 +117,10 @@ public class SpeechRecognitionManager {
             }
             LogUtil.LOGD(LOG_TAG, text.toString());
 
-            speechListener.onSpeechResults(matches);
+            mSphListener.onSpeechResults(matches);
 
             if (isExecuting) {
-                speech.startListening(speechIntent);
+                mSphRecognizer.startListening(mSphIntent);
             }
         }
 
@@ -160,7 +162,7 @@ public class SpeechRecognitionManager {
                     message = "error from server";
                     break;
                 case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
-                    message = "No speech input";
+                    message = "No mSphRecognizer input";
                     break;
                 default:
                     message = "Didn't understand, please try again.";

@@ -2,9 +2,11 @@ package com.esunergy.ams_app_source.fragments;
 
 
 import android.content.Context;
+import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.TextUtils;
+import android.speech.tts.TextToSpeech;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,7 +26,9 @@ import com.esunergy.ams_app_source.Constants;
 import com.esunergy.ams_app_source.R;
 import com.esunergy.ams_app_source.adapter.MySpinnerAdapter;
 import com.esunergy.ams_app_source.base.DynamicViewBinder;
+import com.esunergy.ams_app_source.base.LocationManager;
 import com.esunergy.ams_app_source.base.SpeechRecognitionManager;
+import com.esunergy.ams_app_source.base.TextToSpeechManager;
 import com.esunergy.ams_app_source.base.dynamicviewitem.DynamicViewItem;
 import com.esunergy.ams_app_source.connection.ConnectionService;
 import com.esunergy.ams_app_source.connection.model.ViewTemplate;
@@ -34,6 +38,7 @@ import com.esunergy.ams_app_source.models.active.Param;
 import com.esunergy.ams_app_source.models.dao.ParamsDao;
 import com.esunergy.ams_app_source.utils.LogUtil;
 import com.esunergy.ams_app_source.utils.StringUtil;
+import com.google.android.gms.location.LocationResult;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
@@ -46,6 +51,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -55,6 +61,7 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
         DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
 
     private String PAGE_TAG = "ActionDetailFragment";
+    private final int TTS_CODE = 1;
     private final String END_STATUS_FLAG = "E";   // 結案狀態Flag
 
     private Context ctx;
@@ -70,7 +77,11 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
     private HashMap<String, DynamicViewItem> dynamicViewItems;
     private Calendar calendar;
     private SpeechRecognitionManager speechManager;
+    private TextToSpeechManager ttsManager;
     private HashMap<String, String> speechRecoFields;
+    private LocationManager locationManager;
+
+    private Location location;
 
     private SimpleDateFormat sdf;
 
@@ -103,12 +114,37 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
         sp_status = topLayoutView.findViewById(R.id.sp_status);
         sw_speech_listen = topLayoutView.findViewById(R.id.sw_speech_listen);
 
+        speechManager = SpeechRecognitionManager.getInstance(ctx).setSpeechListener(speechListener);
+        locationManager = LocationManager.getInstance(ctx).setLocationListener(locationListener).init();
+
+        Intent intent = new Intent();
+        intent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+        startActivityForResult(intent, TTS_CODE);
+
         setAdapter();
         setListener();
 
-        speechManager = SpeechRecognitionManager.getInstance(ctx);
-
         return topLayoutView;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        speechManager.stopListening();
+        ttsManager.destroy();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case TTS_CODE: {
+                if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                    ttsManager = TextToSpeechManager.getInstance(ctx).setLanguage(Locale.TAIWAN).init();
+                }
+                break;
+            }
+        }
     }
 
     private void setAdapter() {
@@ -135,6 +171,7 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
         sw_speech_listen.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
                 if (isChecked) {
                     speechManager.startListening();
                 } else {
@@ -142,8 +179,6 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
                 }
             }
         });
-
-        speechManager.setSpeechListener(speechListener);
     }
 
     private void bindView() {
@@ -190,7 +225,6 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
     }
 
     private void bindModel() {
-
         try {
             if (!et_real_datetime_start.getText().toString().isEmpty())
                 eventAction.EventActionRealSDate = sdf.parse(et_real_datetime_start.getText().toString());
@@ -309,9 +343,16 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
     private void sentActionForm() {
         bindModel();
 
-        // 更新行動
-        String jsonStr = gson.toJson(eventAction);
-        mConnectionManager.sendPut(ConnectionService.updateAction, "/" + eventAction.EventActionSn, jsonStr, ActionDetailFragment.this, false);
+        // 填入經緯度
+        if (location != null) {
+            eventAction.UploadLatLng = StringUtil.getLatLngString(location);
+
+            // 更新行動
+            String jsonStr = gson.toJson(eventAction);
+            mConnectionManager.sendPut(ConnectionService.updateAction, "/" + eventAction.EventActionSn, jsonStr, ActionDetailFragment.this, false);
+        } else {
+            Toast.makeText(ctx, "請開啟定位功能", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private Date parseDate(String dateString) {
@@ -399,6 +440,8 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
                     // 辨識節果為"送出"，將表單送出
                     isInput = false;
                     sentActionForm();
+                } else {
+                    ttsSpeak("無此功能，請重新辨識");
                 }
             } else if (StringUtil.isNullOrEmpty(inputFieldId)) {
                 // 狀態二： isInput == true 且 inputFieldId is empty
@@ -415,6 +458,7 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
                 if (StringUtil.isNullOrEmpty(inputFieldId)) {
                     // 提示訊息：查無此欄位
                     Toast.makeText(ctx, "提示訊息：查無此欄位", Toast.LENGTH_SHORT).show();
+                    ttsSpeak("查無此欄位");
                 }
             } else if (!StringUtil.isNullOrEmpty(inputFieldId)) {
                 // 狀態三： isInput == true 且 inputFieldId isn't empty
@@ -425,6 +469,7 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
                 } else {
                     // 提示訊息：欄位辨識錯誤，請重新辨識
                     Toast.makeText(ctx, "提示訊息：欄位辨識錯誤，請重新辨識", Toast.LENGTH_SHORT).show();
+                    ttsSpeak("欄位辨識錯誤，請重新辨識");
                 }
                 isInput = false;
                 inputFieldId = "";
@@ -434,6 +479,20 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
         @Override
         public void onSpeechError(int error) {
 
+        }
+    };
+
+    private void ttsSpeak(String text) {
+        if (ttsManager != null) {
+            ttsManager.initQueue(text);
+        }
+    }
+
+    LocationManager.LocationListener locationListener = new LocationManager.LocationListener() {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            LogUtil.LOGI(PAGE_TAG, locationResult.getLastLocation().getLatitude() + " " + locationResult.getLastLocation().getLongitude());
+            location = locationResult.getLastLocation();
         }
     };
 }

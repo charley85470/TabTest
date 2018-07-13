@@ -48,6 +48,8 @@ dependencies {
     implementation 'com.wdullaer:materialdatetimepicker:3.6.1'
 
     // google
+    implementation 'com.google.android.gms:play-services-location:15.0.1'
+    implementation 'com.google.android.gms:play-services-maps:15.0.1'
 //    implementation 'com.google.api-client:google-api-client-android:1.23.0'
 //    implementation 'com.google.apis:google-api-services-speech:v1-rev51-1.23.0'
 //    implementation 'com.google.apis:google-api-services-language:v1-rev434-1.23.0'
