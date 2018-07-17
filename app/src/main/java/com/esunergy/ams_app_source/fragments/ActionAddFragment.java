@@ -2,8 +2,11 @@ package com.esunergy.ams_app_source.fragments;
 
 
 import android.content.Context;
+import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.speech.tts.TextToSpeech;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +23,9 @@ import com.esunergy.ams_app_source.Constants;
 import com.esunergy.ams_app_source.R;
 import com.esunergy.ams_app_source.adapter.MySpinnerAdapter;
 import com.esunergy.ams_app_source.base.DynamicViewBinder;
+import com.esunergy.ams_app_source.base.LocationManager;
 import com.esunergy.ams_app_source.base.SpeechRecognitionManager;
+import com.esunergy.ams_app_source.base.TextToSpeechManager;
 import com.esunergy.ams_app_source.base.dynamicviewitem.DynamicViewItem;
 import com.esunergy.ams_app_source.connection.ConnectionService;
 import com.esunergy.ams_app_source.connection.model.ViewTemplate;
@@ -30,6 +35,7 @@ import com.esunergy.ams_app_source.models.active.EventAction;
 import com.esunergy.ams_app_source.models.active.Param;
 import com.esunergy.ams_app_source.utils.LogUtil;
 import com.esunergy.ams_app_source.utils.StringUtil;
+import com.google.android.gms.location.LocationResult;
 import com.google.gson.reflect.TypeToken;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
@@ -41,6 +47,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -49,6 +56,7 @@ import java.util.Map;
 public class ActionAddFragment extends BaseConnectionFragment implements View.OnClickListener, DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
 
     private String PAGE_TAG = "ActionAddFragment";
+    private final int TTS_CODE = 1;
 
     private Context ctx;
     private View topLayoutView;
@@ -64,11 +72,16 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
     private Calendar calendar;
     private SimpleDateFormat sdf;
     private SpeechRecognitionManager speechManager;
+    private TextToSpeechManager ttsManager;
     private HashMap<String, String> speechRecoFields;
+    private LocationManager locationManager;
+
+    private Location location;
 
     public ActionAddFragment() {
         // Required empty public constructor
         eventAction = new EventAction();
+        speechRecoFields = new HashMap<>();
         dynamicViewItems = new HashMap<>();
         sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
     }
@@ -103,10 +116,16 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
         mConnectionManager.sendGet(ConnectionService.getActionTitleParams, paramMap, ActionAddFragment.this, false);
         mConnectionManager.sendGet(ConnectionService.getEventActionParams, paramMap, ActionAddFragment.this, false);
 
+        speechManager = SpeechRecognitionManager.getInstance(ctx).setSpeechListener(speechListener).init();
+        locationManager = LocationManager.getInstance(ctx).setLocationListener(locationListener).init();
+
+        // 檢查設備是否有支援TextToSpeech功能
+        Intent intent = new Intent();
+        intent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+        startActivityForResult(intent, TTS_CODE);
+
         setListener();
         bindView();
-
-        speechManager = SpeechRecognitionManager.getInstance(ctx);
 
         return topLayoutView;
     }
@@ -114,7 +133,21 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
     @Override
     public void onDestroy() {
         super.onDestroy();
-        speechManager.stopListening();
+        speechManager.destroy();
+        ttsManager.destroy();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case TTS_CODE: {
+                if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                    ttsManager = TextToSpeechManager.getInstance(ctx).setLanguage(Locale.TAIWAN).setTTSProgressListener(ttsProgressListener).init();
+                }
+                break;
+            }
+        }
     }
 
     @Override
@@ -475,6 +508,24 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
         tpd.show(getFragmentManager(), tag);
     }
 
+    private TextToSpeechManager.TTSProgressListener ttsProgressListener = new TextToSpeechManager.TTSProgressListener() {
+        @Override
+        public void onDone() {
+            startSpeechRecognition();
+        }
+    };
+
+    private void startSpeechRecognition() {
+        // 語音辨識功能只能在主線程內使用
+        getActivity().runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                speechManager.startListening();
+            }
+        });
+    }
+
     private SpeechRecognitionManager.SpeechListener speechListener = new SpeechRecognitionManager.SpeechListener() {
         private boolean isInput = false;
         private String inputFieldId;
@@ -503,6 +554,10 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
                     // 辨識節果為"送出"，將表單送出
                     isInput = false;
                     sentActionForm();
+                } else {
+                    speechManager.stopListening();
+                    Toast.makeText(ctx, "提示訊息：無此功能", Toast.LENGTH_SHORT).show();
+                    ttsSpeak("無此功能，請重新辨識");
                 }
             } else if (StringUtil.isNullOrEmpty(inputFieldId)) {
                 // 狀態二： isInput == true 且 inputFieldId is empty
@@ -518,7 +573,9 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
 
                 if (StringUtil.isNullOrEmpty(inputFieldId)) {
                     // 提示訊息：查無此欄位
+                    speechManager.stopListening();
                     Toast.makeText(ctx, "提示訊息：查無此欄位", Toast.LENGTH_SHORT).show();
+                    ttsSpeak("查無此欄位");
                 }
             } else if (!StringUtil.isNullOrEmpty(inputFieldId)) {
                 // 狀態三： isInput == true 且 inputFieldId isn't empty
@@ -528,7 +585,9 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
                     item.setValue(results.get(0));  // 只以第一筆辨識為最佳解
                 } else {
                     // 提示訊息：欄位辨識錯誤，請重新辨識
+                    speechManager.stopListening();
                     Toast.makeText(ctx, "提示訊息：欄位辨識錯誤，請重新辨識", Toast.LENGTH_SHORT).show();
+                    ttsSpeak("欄位辨識錯誤，請重新辨識");
                 }
                 isInput = false;
                 inputFieldId = "";
@@ -538,6 +597,21 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
         @Override
         public void onSpeechError(int error) {
 
+        }
+    };
+
+    private void ttsSpeak(String text) {
+        if (ttsManager != null) {
+            ttsManager.initQueue(text);
+        }
+    }
+
+
+    LocationManager.LocationListener locationListener = new LocationManager.LocationListener() {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            LogUtil.LOGI(PAGE_TAG, locationResult.getLastLocation().getLatitude() + " " + locationResult.getLastLocation().getLongitude());
+            location = locationResult.getLastLocation();
         }
     };
 }

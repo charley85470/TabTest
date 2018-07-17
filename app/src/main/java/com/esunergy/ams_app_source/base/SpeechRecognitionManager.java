@@ -2,6 +2,7 @@ package com.esunergy.ams_app_source.base;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
@@ -13,24 +14,17 @@ import java.util.ArrayList;
 
 public class SpeechRecognitionManager {
 
-    private String LOG_TAG = "SpeechRecognitionManager";
+    private final String LOG_TAG = "SpeechRecognitionManager";
     private static SpeechRecognitionManager instance;
     private MyRecognitionListener mRgnListener;
     private Context mContext;
     private SpeechRecognizer mSphRecognizer;
     private Intent mSphIntent;
     private SpeechListener mSphListener;
+    private AudioManager mAudioManager;
+    private int streamVolume;
+
     private boolean isExecuting = false;    // 用於辨識是否已關閉此功能，若無則會持續進行語音監聽
-
-    private SpeechRecognitionManager() {
-        mRgnListener = new MyRecognitionListener();
-
-        mSphIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        mSphIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        mSphIntent.putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE, "zh-TW");
-        mSphIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getClass().getPackage().getName());
-        mSphIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
-    }
 
     public static SpeechRecognitionManager getInstance(Context ctx) {
         if (instance == null) {
@@ -49,6 +43,18 @@ public class SpeechRecognitionManager {
         this.mContext = ctx;
     }
 
+    public SpeechRecognitionManager init() {
+        mRgnListener = new MyRecognitionListener();
+        mSphIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        mSphIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        mSphIntent.putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE, "zh-TW");
+        mSphIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getClass().getPackage().getName());
+        mSphIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
+        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        streamVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        return this;
+    }
+
     public void startListening() {
         isExecuting = true;
         mSphRecognizer = SpeechRecognizer.createSpeechRecognizer(mContext);
@@ -58,6 +64,7 @@ public class SpeechRecognitionManager {
 
     public void stopListening() {
         isExecuting = false;
+        setVolume();
         if (mSphRecognizer != null) {
             mSphRecognizer.stopListening();
             mSphRecognizer.cancel();
@@ -65,15 +72,35 @@ public class SpeechRecognitionManager {
         }
     }
 
+    public void destroy() {
+        isExecuting = false;
+        setVolume();
+        if (mSphRecognizer != null) {
+            mSphRecognizer.stopListening();
+            mSphRecognizer.cancel();
+            mSphRecognizer.destroy();
+        }
+    }
+
+    private void setVolume() {
+        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, streamVolume, AudioManager.FLAG_PLAY_SOUND);
+    }
+
+    private void setMute() {
+        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, AudioManager.FLAG_PLAY_SOUND);
+    }
+
     class MyRecognitionListener implements RecognitionListener {
         @Override
         public void onReadyForSpeech(Bundle params) {
             LogUtil.LOGD(LOG_TAG, "onReadyForSpeech");
+
         }
 
         @Override
         public void onBeginningOfSpeech() {
             LogUtil.LOGD(LOG_TAG, "onBeginningOfSpeech");
+            setMute();
             mSphListener.onBeginningOfSpeech();
         }
 
@@ -101,10 +128,16 @@ public class SpeechRecognitionManager {
             if (error != SpeechRecognizer.ERROR_CLIENT && error != SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS) {
                 mSphRecognizer.startListening(mSphIntent);
             }
+            if (error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
+                stopListening();
+                init();
+                startListening();
+            }
         }
 
         @Override
         public void onResults(Bundle results) {
+            setVolume();
             ArrayList<String> matches = new ArrayList<>();
             if (results != null) {
                 matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);

@@ -15,12 +15,14 @@ import com.esunergy.ams_app_source.R;
 import com.esunergy.ams_app_source.base.InitFragmentView;
 import com.esunergy.ams_app_source.connection.model.vwEventAction;
 import com.esunergy.ams_app_source.models.active.Param;
+import com.esunergy.ams_app_source.utils.LogUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.ViewHolder> implements Filterable {
 
+    private String LOG_TAG = "ActionListAdapter";
     private String PAGE_TAG;
     private List<vwEventAction> originData; // 原始資料
     private List<vwEventAction> mData;  // 篩選後資料
@@ -128,6 +130,7 @@ public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.Vi
 
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
+            LogUtil.LOGI(LOG_TAG, "Perform Filtering, constraint:" + constraint);
             List<vwEventAction> filteredData = new ArrayList<>();
             if (constraint != null && !constraint.toString().isEmpty()) {
                 for (vwEventAction ea :

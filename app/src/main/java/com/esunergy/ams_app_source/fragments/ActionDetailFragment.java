@@ -114,9 +114,10 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
         sp_status = topLayoutView.findViewById(R.id.sp_status);
         sw_speech_listen = topLayoutView.findViewById(R.id.sw_speech_listen);
 
-        speechManager = SpeechRecognitionManager.getInstance(ctx).setSpeechListener(speechListener);
+        speechManager = SpeechRecognitionManager.getInstance(ctx).setSpeechListener(speechListener).init();
         locationManager = LocationManager.getInstance(ctx).setLocationListener(locationListener).init();
 
+        // 檢查設備是否有支援TextToSpeech功能
         Intent intent = new Intent();
         intent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
         startActivityForResult(intent, TTS_CODE);
@@ -130,7 +131,7 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
     @Override
     public void onDestroy() {
         super.onDestroy();
-        speechManager.stopListening();
+        speechManager.destroy();
         ttsManager.destroy();
     }
 
@@ -140,7 +141,7 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
         switch (requestCode) {
             case TTS_CODE: {
                 if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
-                    ttsManager = TextToSpeechManager.getInstance(ctx).setLanguage(Locale.TAIWAN).init();
+                    ttsManager = TextToSpeechManager.getInstance(ctx).setLanguage(Locale.TAIWAN).setTTSProgressListener(ttsProgressListener).init();
                 }
                 break;
             }
@@ -173,7 +174,7 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
                 if (isChecked) {
-                    speechManager.startListening();
+                    startSpeechRecognition();
                 } else {
                     speechManager.stopListening();
                 }
@@ -441,6 +442,8 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
                     isInput = false;
                     sentActionForm();
                 } else {
+                    speechManager.stopListening();
+                    Toast.makeText(ctx, "提示訊息：無此功能", Toast.LENGTH_SHORT).show();
                     ttsSpeak("無此功能，請重新辨識");
                 }
             } else if (StringUtil.isNullOrEmpty(inputFieldId)) {
@@ -457,6 +460,7 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
 
                 if (StringUtil.isNullOrEmpty(inputFieldId)) {
                     // 提示訊息：查無此欄位
+                    speechManager.stopListening();
                     Toast.makeText(ctx, "提示訊息：查無此欄位", Toast.LENGTH_SHORT).show();
                     ttsSpeak("查無此欄位");
                 }
@@ -468,6 +472,7 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
                     item.setValue(results.get(0));  // 只以第一筆辨識為最佳解
                 } else {
                     // 提示訊息：欄位辨識錯誤，請重新辨識
+                    speechManager.stopListening();
                     Toast.makeText(ctx, "提示訊息：欄位辨識錯誤，請重新辨識", Toast.LENGTH_SHORT).show();
                     ttsSpeak("欄位辨識錯誤，請重新辨識");
                 }
@@ -481,6 +486,24 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
 
         }
     };
+
+    private TextToSpeechManager.TTSProgressListener ttsProgressListener = new TextToSpeechManager.TTSProgressListener() {
+        @Override
+        public void onDone() {
+            startSpeechRecognition();
+        }
+    };
+
+    private void startSpeechRecognition() {
+        // 語音辨識功能只能在主線程內使用
+        getActivity().runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                speechManager.startListening();
+            }
+        });
+    }
 
     private void ttsSpeak(String text) {
         if (ttsManager != null) {
