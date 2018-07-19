@@ -18,4 +18,5 @@
     <string name="sent">Sent</string>
     <string name="hint_password">Please input password</string>
     <string name="speech_recognition">Speech Recognition</string>
+    <string name="login_user">Login User：%1$s</string>
 </resources>

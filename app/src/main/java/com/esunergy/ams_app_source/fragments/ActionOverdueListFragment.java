@@ -33,21 +33,18 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ActionListFragment extends BaseConnectionFragment implements View.OnTouchListener {
+public class ActionOverdueListFragment extends BaseConnectionFragment implements View.OnTouchListener {
 
     private String PAGE_TAG = "ActionListFragment";
 
     private Context ctx;
     private View topLayoutView;
-
-    private Spinner sp_event_list;
     private RecyclerView rv_action_list;
 
     private ActionListAdapter actionListAdapter;
     private List<vwEventAction> eventActions;
-    private MySpinnerAdapter mySpinnerAdapter;
 
-    public ActionListFragment() {
+    public ActionOverdueListFragment() {
         // Required empty public constructor
     }
 
@@ -55,26 +52,23 @@ public class ActionListFragment extends BaseConnectionFragment implements View.O
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         ctx = getActivity();
-        topLayoutView = LayoutInflater.from(ctx).inflate(R.layout.fragment_action_list, container, false);
-
-        sp_event_list = topLayoutView.findViewById(R.id.sp_event_list);
+        topLayoutView = LayoutInflater.from(ctx).inflate(R.layout.fragment_action_overdue_list, container, false);
         rv_action_list = topLayoutView.findViewById(R.id.rv_action_list);
 
         actionListAdapter = new ActionListAdapter()
                 .setFragmentManager(getFragmentManager())
                 .setPageTag(PAGE_TAG);
+
         final LinearLayoutManager layoutManager = new LinearLayoutManager(ctx);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         rv_action_list.setLayoutManager(layoutManager);
         rv_action_list.setAdapter(actionListAdapter);
 
-        sp_event_list.setOnItemSelectedListener(onItemSelectedListener);
-
         showProgressDialog();
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("Company", Constants.userCompany);
         jsonObject.addProperty("UserID", Constants.account);
-        mConnectionManager.sendGet(ConnectionService.getPartialActions, jsonObject, this, false);
+        mConnectionManager.sendGet(ConnectionService.getOverdueActions, jsonObject, this, false);
 
         return topLayoutView;
     }
@@ -84,24 +78,13 @@ public class ActionListFragment extends BaseConnectionFragment implements View.O
         dismissProgressDialog();
 
         switch (service) {
-            case getPartialActions: {
+            case getOverdueActions: {
                 LogUtil.LOGI(PAGE_TAG, "EventActions = " + result);
                 try {
                     eventActions = gson.fromJson(result, new TypeToken<ArrayList<vwEventAction>>() {
                     }.getType());
 
                     actionListAdapter.setData(eventActions);
-
-                    List<SelectItem> selectItems = new ArrayList<>();
-                    for (vwEventAction eventAction :
-                            eventActions) {
-                        SelectItem selectItem = new SelectItem().setValue(eventAction.EventId).setText(eventAction.Title);
-                        if (!selectItems.contains(selectItem)) {
-                            selectItems.add(selectItem);
-                        }
-                    }
-                    mySpinnerAdapter = new MySpinnerAdapter(ctx, selectItems, true);
-                    sp_event_list.setAdapter(mySpinnerAdapter);
                 } catch (JsonSyntaxException e) {
                     e.printStackTrace();
                 }
@@ -115,20 +98,4 @@ public class ActionListFragment extends BaseConnectionFragment implements View.O
         return false;
     }
 
-    private AdapterView.OnItemSelectedListener onItemSelectedListener = new AdapterView.OnItemSelectedListener() {
-        @Override
-        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            switch (parent.getId()) {
-                case R.id.sp_event_list: {
-                    actionListAdapter.getFilter().filter(mySpinnerAdapter.getItem(position).value);
-                    break;
-                }
-            }
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> parent) {
-
-        }
-    };
 }

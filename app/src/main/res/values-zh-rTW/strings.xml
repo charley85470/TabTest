@@ -18,4 +18,5 @@
     <string name="sent">送出</string>
     <string name="hint_password">請輸入密碼</string>
     <string name="speech_recognition">語音辨識</string>
+    <string name="login_user">登入者：%1$s</string>
 </resources>

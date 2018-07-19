@@ -9,6 +9,8 @@ import com.esunergy.ams_app_source.fragments.ActionAddFragment;
 import com.esunergy.ams_app_source.fragments.ActionAddSelectEventFragment;
 import com.esunergy.ams_app_source.fragments.ActionDetailFragment;
 import com.esunergy.ams_app_source.fragments.ActionListFragment;
+import com.esunergy.ams_app_source.fragments.ActionOverdueListFragment;
+import com.esunergy.ams_app_source.fragments.ActionTodoListFragment;
 import com.esunergy.ams_app_source.fragments.LoginFragment;
 import com.esunergy.ams_app_source.fragments.MenuFragment;
 import com.esunergy.ams_app_source.fragments.SpeechAPITestFragment;
@@ -119,6 +121,44 @@ public class InitFragmentView {
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right);
         transaction.replace(R.id.fragment_frame, actionListFragment);
+
+        if (!_PAGE_TAG.isEmpty()) {
+            transaction.addToBackStack(_PAGE_TAG);
+        }
+
+        transaction.commit();
+    }
+
+    /**
+     * 切換 行動查詢頁面
+     */
+    public void initActionTodoListView() {
+        ActionTodoListFragment actionTodoListFragment = new ActionTodoListFragment();
+
+        actionTodoListFragment.setArguments(bundle);
+        FragmentManager manager = _fm;
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right);
+        transaction.replace(R.id.fragment_frame, actionTodoListFragment);
+
+        if (!_PAGE_TAG.isEmpty()) {
+            transaction.addToBackStack(_PAGE_TAG);
+        }
+
+        transaction.commit();
+    }
+
+    /**
+     * 切換 行動查詢頁面
+     */
+    public void initActionOverdueListView() {
+        ActionOverdueListFragment actionOverdueListFragment = new ActionOverdueListFragment();
+
+        actionOverdueListFragment.setArguments(bundle);
+        FragmentManager manager = _fm;
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right);
+        transaction.replace(R.id.fragment_frame, actionOverdueListFragment);
 
         if (!_PAGE_TAG.isEmpty()) {
             transaction.addToBackStack(_PAGE_TAG);

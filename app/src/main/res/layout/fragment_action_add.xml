@@ -18,22 +18,23 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/textView13"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="事件"
+                    android:text="事件標題"
                     android:theme="@style/DetailViewLabel" />
 
                 <TextView
-                    android:id="@+id/tv_event"
+                    android:id="@+id/tv_event_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="TextView"
+                    android:text="事件標題事件標題"
                     android:theme="@style/DetailViewTextView" />
             </LinearLayout>
 
@@ -162,7 +163,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/textView6"

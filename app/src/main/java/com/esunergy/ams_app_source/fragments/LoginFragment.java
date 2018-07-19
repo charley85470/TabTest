@@ -48,12 +48,12 @@ public class LoginFragment extends BaseConnectionFragment implements View.OnTouc
 
     public LoginFragment() {
         // Required empty public constructor
-        initFragmentView = new InitFragmentView(getFragmentManager());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        initFragmentView = new InitFragmentView(getFragmentManager());
         ctx = getActivity();
         topLayoutView = LayoutInflater.from(ctx).inflate(R.layout.fragment_login, container, false);
 
@@ -114,13 +114,11 @@ public class LoginFragment extends BaseConnectionFragment implements View.OnTouc
                 if (response.statusCode == 200) {
                     try {
                         loginInfo = gson.fromJson(response.data.toString(), LoginInfo.class);
-//                        loginInfo.user = et_account.getText().toString();
-//                        loginInfo.menuMode = MenuFragment.MENU_MODE_STEP1_BeforeDownload;
                         loginInfo.save();
 
                         LogUtil.LOGI(PAGE_TAG, "LoginInfo = " + loginInfo);
-                        Constants.setLogin(loginInfo.user, loginInfo.userNameE, loginInfo.userCompany);
-                        initFragmentView.initLoginView();
+                        Constants.setLogin(loginInfo.userID, loginInfo.userNameE, loginInfo.userCompany);
+                        initFragmentView.initMenuView();
                         //toMenuFragment();
                     } catch (JsonSyntaxException e) {
                         e.printStackTrace();

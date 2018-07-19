@@ -8,8 +8,10 @@ import com.google.gson.annotations.SerializedName;
 
 @Table(name = "LOGIN_INFO")
 public class LoginInfo extends Model {
+    @Expose
+    @SerializedName("UserID")
     @Column(name = "USER", unique = true, onUniqueConflict = Column.ConflictAction.REPLACE)
-    public String user;  //登入帳號
+    public String userID;
 
     @Expose
     @SerializedName("UserNameE")
@@ -33,7 +35,7 @@ public class LoginInfo extends Model {
     @Override
     public String toString() {
         return "LoginTripInfo{" +
-                "user='" + user + '\'' +
+                "userID='" + userID + '\'' +
                 ", userNameC='" + userNameC + '\'' +
                 ", userNameE='" + userNameE + '\'' +
                 ", Company='" + userCompany + '\'' +

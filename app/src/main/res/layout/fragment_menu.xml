@@ -4,11 +4,44 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_app_version"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/version" />
+
+        <TextView
+            android:id="@+id/tv_login_user"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="right"
+            android:text="登入者：ABC" />
+    </LinearLayout>
+
     <Button
         android:id="@+id/btn_add_action"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="新增行動" />
+
+    <Button
+        android:id="@+id/btn_action_todo_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="待辦行動" />
+
+    <Button
+        android:id="@+id/btn_action_overdue_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="逾期行動" />
 
     <Button
         android:id="@+id/btn_action_list"
@@ -20,5 +53,6 @@
         android:id="@+id/btn_speech_test"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="SpeechTest" />
+        android:text="SpeechTest"
+        android:visibility="gone" />
 </LinearLayout>

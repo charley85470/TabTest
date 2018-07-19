@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ConnectionManager {
 
@@ -83,11 +84,16 @@ public class ConnectionManager {
         mConnectionTask.execute();
     }
 
+    public void sendPost(ConnectionService connectionService, JsonObject jsonObject, ConnectionListener listener, boolean isShowDialog) {
+        String jsonString = gson.toJson(jsonObject);
+        mConnectionTask = new ConnectionTask(ConnectionType.POST, connectionService, "", jsonString, listener, isShowDialog);
+        mConnectionTask.execute();
+    }
+
     public void sendPut(ConnectionService connectionService, String params, String jsonString, ConnectionListener listener, boolean isShowDialog) {
         mConnectionTask = new ConnectionTask(ConnectionType.PUT, connectionService, params, jsonString, listener, isShowDialog);
         mConnectionTask.execute();
     }
-
 
     public void sendGet(ConnectionService connectionService, ConnectionListener listener, boolean isShowDialog) {
         mConnectionTask = new ConnectionTask(ConnectionType.GET, connectionService, "", null, listener, isShowDialog);
@@ -98,6 +104,17 @@ public class ConnectionManager {
         StringBuilder paramString = new StringBuilder();
         for (Map.Entry<String, String> entry : params.entrySet()) {
             paramString.append(entry.getKey() + "=" + entry.getValue());
+            paramString.append("&");
+        }
+
+        sendGet(connectionService, "?" + paramString.toString(), listener, isShowDialog);
+    }
+
+    public void sendGet(ConnectionService connectionService, JsonObject params, ConnectionListener listener, boolean isShowDialog) {
+        StringBuilder paramString = new StringBuilder();
+
+        for (Map.Entry<String, JsonElement> entry : params.entrySet()) {
+            paramString.append(entry.getKey() + "=" + entry.getValue().getAsString());
             paramString.append("&");
         }
 

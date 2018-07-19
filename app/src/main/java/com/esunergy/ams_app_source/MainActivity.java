@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -33,8 +34,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initFragmentView = new InitFragmentView(getFragmentManager());
-
         loadUserData();
 
         //checkPermission , checkVersion
@@ -53,29 +52,33 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        initFragmentView = new InitFragmentView(manager);
 
         //check permission
         checkPermission();
     }
 
     private void checkPermission() {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_AUDIO);
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET}, INTERNET);
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, ACCESS_COARSE_LOCATION);
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION);
+        int pms_WRITE_EXTERNAL_STORAGE = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int pms_RECORD_AUDIO = ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO);
+        int pms_INTERNET = ActivityCompat.checkSelfPermission(this, Manifest.permission.INTERNET);
+        int pms_ACCESS_COARSE_LOCATION = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
+        int pms_ACCESS_FINE_LOCATION = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
 
-
-        int permission = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        int permission2 = ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO);
-        int permission3 = ActivityCompat.checkSelfPermission(this, Manifest.permission.INTERNET);
-        int permission4 = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
-        int permission5 = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            //未取得權限，向使用者要求允許權限
+        if (pms_WRITE_EXTERNAL_STORAGE != PackageManager.PERMISSION_GRANTED ||
+                pms_RECORD_AUDIO != PackageManager.PERMISSION_GRANTED ||
+                pms_INTERNET != PackageManager.PERMISSION_GRANTED ||
+                pms_ACCESS_COARSE_LOCATION != PackageManager.PERMISSION_GRANTED ||
+                pms_ACCESS_FINE_LOCATION != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                     this,
                     new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            android.Manifest.permission.READ_EXTERNAL_STORAGE},
+                            android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.RECORD_AUDIO,
+                            Manifest.permission.INTERNET,
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                    },
                     REQUEST_EXTERNAL_STORAGE
             );
         } else {

@@ -1,6 +1,7 @@
 package com.esunergy.ams_app_source.fragments;
 
 
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -16,6 +17,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.esunergy.ams_app_source.BuildConfig;
@@ -23,6 +25,7 @@ import com.esunergy.ams_app_source.Constants;
 import com.esunergy.ams_app_source.R;
 import com.esunergy.ams_app_source.adapter.MySpinnerAdapter;
 import com.esunergy.ams_app_source.base.DynamicViewBinder;
+import com.esunergy.ams_app_source.base.InitFragmentView;
 import com.esunergy.ams_app_source.base.LocationManager;
 import com.esunergy.ams_app_source.base.SpeechRecognitionManager;
 import com.esunergy.ams_app_source.base.TextToSpeechManager;
@@ -64,6 +67,7 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
     private Button btn_sent, btn_cancel;
     private Spinner sp_event_prop, sp_action_title, sp_action;
     private EditText et_datetime_start, et_datetime_end, et_real_datetime_start, et_real_datetime_end;
+    private TextView tv_event_title;
 
     private long _eventSn;
     private String _eventId;
@@ -73,8 +77,9 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
     private SimpleDateFormat sdf;
     private SpeechRecognitionManager speechManager;
     private TextToSpeechManager ttsManager;
-    private HashMap<String, String> speechRecoFields;
+    private HashMap<String, String> speechRecoFields;   // 可語音辨識的欄位
     private LocationManager locationManager;
+    private FragmentManager fm;
 
     private Location location;
 
@@ -101,10 +106,13 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
         et_datetime_end = topLayoutView.findViewById(R.id.et_datetime_end);
         et_real_datetime_start = topLayoutView.findViewById(R.id.et_real_datetime_start);
         et_real_datetime_end = topLayoutView.findViewById(R.id.et_real_datetime_end);
+        tv_event_title = topLayoutView.findViewById(R.id.tv_event_title);
 
         Bundle bundle = getArguments();
         _eventSn = bundle.getLong("EventSn");
         _eventId = bundle.getString("EventId");
+
+        fm = getFragmentManager();
 
         HashMap<String, String> paramMap = new HashMap<>();
         paramMap.put("Company", Constants.userCompany);
@@ -238,7 +246,15 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
             }
             case addAction: {
                 Toast.makeText(ctx, "新增成功", Toast.LENGTH_SHORT).show();
-                getFragmentManager().popBackStack();
+                // 新增成功後清空表單使其可新建下筆資料
+                sp_event_prop.setSelection(0);
+                sp_action_title.setSelection(0);
+                sp_action.setSelection(0);
+
+                eventAction = new EventAction();
+                initDynamicView(new ArrayList<ViewTemplate>());
+                bindView();
+                bindModel();
             }
         }
     }
@@ -356,6 +372,7 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
     }
 
     private void bindView() {
+        tv_event_title.setText(eventAction.Title);
 
         if (eventAction.EventActionSDate != null)
             et_datetime_start.setText(sdf.format(eventAction.EventActionSDate));

@@ -17,6 +17,8 @@ import com.esunergy.ams_app_source.connection.model.vwEventAction;
 import com.esunergy.ams_app_source.models.active.Param;
 import com.esunergy.ams_app_source.utils.LogUtil;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,10 +31,12 @@ public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.Vi
     private Context ctx;
     private FragmentManager fm;
     private MyFilter mFilter;
+    private SimpleDateFormat sdf;
 
     public ActionListAdapter() {
         originData = new ArrayList<>();
         mData = new ArrayList<>();
+        sdf = new SimpleDateFormat("dd");
     }
 
     @Override
@@ -52,18 +56,19 @@ public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.Vi
         holder.tv_act_item_acttitle.setText(item.EventActionTitleCName);
         holder.tv_act_item_evntitle.setText(item.Title);
         holder.tv_act_item_evnprop.setText(item.EventPropParamCName);
+        holder.tv_act_item_sdate_md.setText(sdf.format(item.EventActionSDate));
 
-        if (!"Y".equals(item.Flag)) {
-            holder.tv_act_item_action.setTextColor(ctx.getColor(R.color.text_color_disabled));
-            holder.tv_act_item_acttitle.setTextColor(ctx.getColor(R.color.text_color_disabled));
-            holder.tv_act_item_evntitle.setTextColor(ctx.getColor(R.color.text_color_disabled));
-            holder.tv_act_item_evnprop.setTextColor(ctx.getColor(R.color.text_color_disabled));
-        } else {
-            holder.tv_act_item_action.setTextColor(ctx.getColor(R.color.text_color_normal));
-            holder.tv_act_item_acttitle.setTextColor(ctx.getColor(R.color.text_color_normal));
-            holder.tv_act_item_evntitle.setTextColor(ctx.getColor(R.color.text_color_normal));
-            holder.tv_act_item_evnprop.setTextColor(ctx.getColor(R.color.text_color_normal));
-        }
+//        if (!"Y".equals(item.Flag)) {
+//            holder.tv_act_item_action.setTextColor(ctx.getColor(R.color.text_color_disabled));
+//            holder.tv_act_item_acttitle.setTextColor(ctx.getColor(R.color.text_color_disabled));
+//            holder.tv_act_item_evntitle.setTextColor(ctx.getColor(R.color.text_color_disabled));
+//            holder.tv_act_item_evnprop.setTextColor(ctx.getColor(R.color.text_color_disabled));
+//        } else {
+//            holder.tv_act_item_action.setTextColor(ctx.getColor(R.color.text_color_normal));
+//            holder.tv_act_item_acttitle.setTextColor(ctx.getColor(R.color.text_color_normal));
+//            holder.tv_act_item_evntitle.setTextColor(ctx.getColor(R.color.text_color_normal));
+//            holder.tv_act_item_evnprop.setTextColor(ctx.getColor(R.color.text_color_normal));
+//        }
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,7 +100,7 @@ public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.Vi
         this.originData = data;
         this.mData.clear();
         this.mData.addAll(originData);
-
+        notifyDataSetChanged();
         return this;
     }
 
@@ -115,7 +120,7 @@ public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.Vi
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView tv_act_item_action, tv_act_item_acttitle, tv_act_item_evntitle, tv_act_item_evnprop;
+        public TextView tv_act_item_action, tv_act_item_acttitle, tv_act_item_evntitle, tv_act_item_evnprop, tv_act_item_sdate_md;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -123,6 +128,7 @@ public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.Vi
             tv_act_item_acttitle = itemView.findViewById(R.id.tv_act_item_acttitle);
             tv_act_item_evntitle = itemView.findViewById(R.id.tv_act_item_evntitle);
             tv_act_item_evnprop = itemView.findViewById(R.id.tv_act_item_evnprop);
+            tv_act_item_sdate_md = itemView.findViewById(R.id.tv_act_item_sdate_md);
         }
     }
 

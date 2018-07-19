@@ -8,6 +8,7 @@ public enum ConnectionService {
 
     // 事件
     getEvents("api/EventMain/GetEvents"),
+    getExecutingEvents("api/EventMain/GetExecutingEvents"),
 
     // 事件類型
     getProps("/api/EventProp/GetProps"),
@@ -17,6 +18,9 @@ public enum ConnectionService {
     getAction("/api/EventAction/GetAction"),
     getActions("/api/EventAction/GetActions"),
     getSortedActions("/api/EventAction/GetSortedActions"),
+    getTodoActions("/api/EventAction/GetTodoActions"),
+    getOverdueActions("/api/EventAction/GetOverdueActions"),
+    getPartialActions("/api/EventAction/GetPartialActions"),
     addAction("/api/EventAction/AddAction/"),
     updateAction("/api/EventAction/UpdateAction/"),
     getActionViewTemplate("/api/EventAction/GetViewTemplate"),
