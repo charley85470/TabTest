@@ -19,4 +19,8 @@
     <string name="hint_password">請輸入密碼</string>
     <string name="speech_recognition">語音辨識</string>
     <string name="login_user">登入者：%1$s</string>
+    <string name="must_input">請填入以下欄位：</string>
+    <string name="real_date">實際時程</string>
+    <string name="estimate_date">預估時程</string>
+    <string name="event_action">行動</string>
 </resources>

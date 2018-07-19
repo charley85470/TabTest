@@ -15,11 +15,14 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/tv_evn_item_evnid"
+                android:id="@+id/tv_evn_item_custname"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="事件編號" />
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:text="客戶"
+                android:textColor="@color/colorAccent"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
         </LinearLayout>
 
@@ -34,16 +37,24 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="事件標題"
-                android:textSize="24sp" />
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:visibility="gone">
 
             <TextView
-                android:id="@+id/tv_evn_item_custname"
+                android:id="@+id/tv_evn_item_evnid"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="2"
-                android:text="客戶" />
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="事件編號" />
 
         </LinearLayout>
+
     </LinearLayout>
 
     <View

@@ -19,4 +19,8 @@
     <string name="hint_password">Please input password</string>
     <string name="speech_recognition">Speech Recognition</string>
     <string name="login_user">Login User：%1$s</string>
+    <string name="must_input">Please key-in following fields：</string>
+    <string name="real_date">Real Date</string>
+    <string name="estimate_date">Estimate Date</string>
+    <string name="event_action">Action</string>
 </resources>

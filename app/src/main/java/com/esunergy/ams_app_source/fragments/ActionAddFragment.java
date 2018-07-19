@@ -36,6 +36,7 @@ import com.esunergy.ams_app_source.connection.model.vwEventProp;
 import com.esunergy.ams_app_source.models.SelectItem;
 import com.esunergy.ams_app_source.models.active.EventAction;
 import com.esunergy.ams_app_source.models.active.Param;
+import com.esunergy.ams_app_source.utils.DialogUtil;
 import com.esunergy.ams_app_source.utils.LogUtil;
 import com.esunergy.ams_app_source.utils.StringUtil;
 import com.google.android.gms.location.LocationResult;
@@ -359,10 +360,22 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
 
     private void sentActionForm() {
         bindModel();
+        String vldMsg = validateModel();
 
-        // 新增行動
-        String jsonStr = gson.toJson(eventAction);
-        mConnectionManager.sendPost(ConnectionService.addAction, jsonStr, ActionAddFragment.this, false);
+        if (!StringUtil.isNullOrEmpty(vldMsg)) {
+            DialogUtil.showMessage(ctx, getString(R.string.must_input), vldMsg);
+        } else {
+            // 填入經緯度
+            if (location != null) {
+                eventAction.UploadLatLng = StringUtil.getLatLngString(location);
+
+                // 新增行動
+                String jsonStr = gson.toJson(eventAction);
+                mConnectionManager.sendPut(ConnectionService.updateAction, "/" + eventAction.EventActionSn, jsonStr, ActionAddFragment.this, false);
+            } else {
+                Toast.makeText(ctx, "請開啟定位功能", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void initDynamicView(List<ViewTemplate> viewTemplates) {
@@ -372,27 +385,24 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
     }
 
     private void bindView() {
+        Calendar dfCld = Calendar.getInstance();
+        dfCld.set(Calendar.HOUR_OF_DAY, 9);
+        dfCld.set(Calendar.MINUTE, 0);
+        dfCld.set(Calendar.SECOND, 0);
+        dfCld.set(Calendar.MILLISECOND, 0);
+
+
         tv_event_title.setText(eventAction.Title);
 
         if (eventAction.EventActionSDate != null)
             et_datetime_start.setText(sdf.format(eventAction.EventActionSDate));
         else
-            et_datetime_start.setText("");
+            et_datetime_start.setText(sdf.format(dfCld.getTime()));
 
         if (eventAction.EventActionEDate != null)
             et_datetime_end.setText(sdf.format(eventAction.EventActionEDate));
         else
-            et_datetime_end.setText("");
-
-        if (eventAction.EventActionRealSDate != null)
-            et_real_datetime_start.setText(sdf.format(eventAction.EventActionRealSDate));
-        else
-            et_real_datetime_start.setText("");
-
-        if (eventAction.EventActionRealEDate != null)
-            et_real_datetime_end.setText(sdf.format(eventAction.EventActionRealEDate));
-        else
-            et_real_datetime_end.setText("");
+            et_datetime_end.setText(sdf.format(dfCld.getTime()));
 
         // Dynamic View Items
         for (Map.Entry<String, DynamicViewItem> entry : dynamicViewItems.entrySet()) {
@@ -437,12 +447,6 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
         if (!et_datetime_end.getText().toString().isEmpty())
             eventAction.EventActionEDate = parseDate(et_datetime_end.getText().toString());
 
-        if (!et_real_datetime_start.getText().toString().isEmpty())
-            eventAction.EventActionRealSDate = parseDate(et_real_datetime_start.getText().toString());
-
-        if (!et_real_datetime_end.getText().toString().isEmpty())
-            eventAction.EventActionRealEDate = parseDate(et_real_datetime_start.getText().toString());
-
         eventAction.CreateBy = Constants.account;
 
         for (Map.Entry<String, DynamicViewItem> entry
@@ -458,6 +462,20 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
                 e.printStackTrace();
             }
         }
+    }
+
+    private String validateModel() {
+        StringBuilder vdtMsg = new StringBuilder();
+
+        if (StringUtil.isNullOrEmpty(eventAction.EventActionParamCode)) {
+            vdtMsg.append(getString(R.string.event_action)).append("\n");
+        }
+
+        if (eventAction.EventActionSDate == null || eventAction.EventActionEDate == null) {
+            vdtMsg.append(getString(R.string.estimate_date)).append("\n");
+        }
+
+        return vdtMsg.toString();
     }
 
     private Date parseDate(String dateString) {

@@ -36,6 +36,7 @@ import com.esunergy.ams_app_source.models.SelectItem;
 import com.esunergy.ams_app_source.models.active.EventAction;
 import com.esunergy.ams_app_source.models.active.Param;
 import com.esunergy.ams_app_source.models.dao.ParamsDao;
+import com.esunergy.ams_app_source.utils.DialogUtil;
 import com.esunergy.ams_app_source.utils.LogUtil;
 import com.esunergy.ams_app_source.utils.StringUtil;
 import com.google.android.gms.location.LocationResult;
@@ -46,6 +47,7 @@ import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.temporal.ValueRange;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -183,6 +185,12 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
     }
 
     private void bindView() {
+        Calendar dfCld = Calendar.getInstance();
+        dfCld.set(Calendar.HOUR_OF_DAY, 9);
+        dfCld.set(Calendar.MINUTE, 0);
+        dfCld.set(Calendar.SECOND, 0);
+        dfCld.set(Calendar.MILLISECOND, 0);
+
         tv_event_prop.setText(eventAction.EventPropParamCName);
         tv_action_title.setText(eventAction.EventActionTitleCName);
         tv_action.setText(eventAction.EventActionParamCName);
@@ -192,12 +200,12 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
         if (eventAction.EventActionRealSDate != null)
             et_real_datetime_start.setText(sdf.format(eventAction.EventActionRealSDate));
         else
-            et_real_datetime_start.setText("");
+            et_real_datetime_start.setText(sdf.format(dfCld.getTime()));
 
         if (eventAction.EventActionRealEDate != null)
             et_real_datetime_end.setText(sdf.format(eventAction.EventActionRealEDate));
         else
-            et_real_datetime_end.setText("");
+            et_real_datetime_end.setText(sdf.format(dfCld.getTime()));
 
         // Dynamic View Items
         for (Map.Entry<String, DynamicViewItem> entry : dynamicViewItems.entrySet()) {
@@ -220,6 +228,8 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
 
         // 已結案，不可再送出編輯
         if (END_STATUS_FLAG.equals(eventAction.Flag)) {
+            et_real_datetime_start.setEnabled(false);
+            et_real_datetime_end.setEnabled(false);
             sp_status.setEnabled(false);
             btn_sent.setEnabled(false);
         }
@@ -252,6 +262,16 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
 
         eventAction.Flag = ((SelectItem) sp_status.getSelectedItem()).value;
         eventAction.UpdateBy = Constants.account;
+    }
+
+    private String validateModel() {
+        StringBuilder vdtMsg = new StringBuilder();
+
+        if (eventAction.EventActionRealSDate == null || eventAction.EventActionRealEDate == null) {
+            vdtMsg.append(getString(R.string.real_date)).append("\n");
+        }
+
+        return vdtMsg.toString();
     }
 
     /**
@@ -343,16 +363,21 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
 
     private void sentActionForm() {
         bindModel();
+        String vldMsg = validateModel();
 
-        // 填入經緯度
-        if (location != null) {
-            eventAction.UploadLatLng = StringUtil.getLatLngString(location);
-
-            // 更新行動
-            String jsonStr = gson.toJson(eventAction);
-            mConnectionManager.sendPut(ConnectionService.updateAction, "/" + eventAction.EventActionSn, jsonStr, ActionDetailFragment.this, false);
+        if (!StringUtil.isNullOrEmpty(vldMsg)) {
+            DialogUtil.showMessage(ctx, getString(R.string.must_input), vldMsg);
         } else {
-            Toast.makeText(ctx, "請開啟定位功能", Toast.LENGTH_SHORT).show();
+            // 填入經緯度
+            if (location != null) {
+                eventAction.UploadLatLng = StringUtil.getLatLngString(location);
+
+                // 更新行動
+                String jsonStr = gson.toJson(eventAction);
+                mConnectionManager.sendPut(ConnectionService.updateAction, "/" + eventAction.EventActionSn, jsonStr, ActionDetailFragment.this, false);
+            } else {
+                Toast.makeText(ctx, "請開啟定位功能", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
