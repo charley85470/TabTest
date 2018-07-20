@@ -13,27 +13,17 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Spinner;
 
-import com.esunergy.ams_app_source.Constants;
 import com.esunergy.ams_app_source.R;
 import com.esunergy.ams_app_source.adapter.ActionListAdapter;
-import com.esunergy.ams_app_source.adapter.MySpinnerAdapter;
-import com.esunergy.ams_app_source.connection.ConnectionService;
-import com.esunergy.ams_app_source.connection.model.vwEventAction;
-import com.esunergy.ams_app_source.models.SelectItem;
-import com.esunergy.ams_app_source.utils.LogUtil;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import com.esunergy.ams_app_source.base.InitFragmentView;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ActionListFragment extends BaseConnectionFragment implements View.OnTouchListener {
+public class ActionListFragment extends BaseFragment implements View.OnTouchListener {
 
     private String PAGE_TAG = "ActionListFragment";
 
@@ -44,8 +34,6 @@ public class ActionListFragment extends BaseConnectionFragment implements View.O
     private RecyclerView rv_action_list;
 
     private ActionListAdapter actionListAdapter;
-    private List<vwEventAction> eventActions;
-    private MySpinnerAdapter mySpinnerAdapter;
 
     public ActionListFragment() {
         // Required empty public constructor
@@ -68,52 +56,12 @@ public class ActionListFragment extends BaseConnectionFragment implements View.O
         rv_action_list.setLayoutManager(layoutManager);
         rv_action_list.setAdapter(actionListAdapter);
 
-        sp_event_list.setOnItemSelectedListener(onItemSelectedListener);
-
-        showProgressDialog();
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("Company", Constants.userCompany);
-        jsonObject.addProperty("UserID", Constants.account);
-        mConnectionManager.sendGet(ConnectionService.getPartialActions, jsonObject, this, false);
-
-        return topLayoutView;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        String s = "";
-    }
-
-    @Override
-    public void onConnectionResponse(ConnectionService service, String result) {
-        dismissProgressDialog();
-
-        switch (service) {
-            case getPartialActions: {
-                LogUtil.LOGI(PAGE_TAG, "EventActions = " + result);
-                try {
-                    eventActions = gson.fromJson(result, new TypeToken<ArrayList<vwEventAction>>() {
-                    }.getType());
-
-                    actionListAdapter.setData(eventActions);
-
-                    List<SelectItem> selectItems = new ArrayList<>();
-                    for (vwEventAction eventAction :
-                            eventActions) {
-                        SelectItem selectItem = new SelectItem().setValue(eventAction.EventId).setText(eventAction.Title);
-                        if (!selectItems.contains(selectItem)) {
-                            selectItems.add(selectItem);
-                        }
-                    }
-                    mySpinnerAdapter = new MySpinnerAdapter(ctx, selectItems, true);
-                    sp_event_list.setAdapter(mySpinnerAdapter);
-                } catch (JsonSyntaxException e) {
-                    e.printStackTrace();
-                }
-                break;
-            }
+        List<String> strings = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            strings.add("" + i);
         }
+        actionListAdapter.setData(strings);
+        return topLayoutView;
     }
 
     @Override
@@ -121,20 +69,4 @@ public class ActionListFragment extends BaseConnectionFragment implements View.O
         return false;
     }
 
-    private AdapterView.OnItemSelectedListener onItemSelectedListener = new AdapterView.OnItemSelectedListener() {
-        @Override
-        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            switch (parent.getId()) {
-                case R.id.sp_event_list: {
-                    actionListAdapter.getFilter().filter(mySpinnerAdapter.getItem(position).value);
-                    break;
-                }
-            }
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> parent) {
-
-        }
-    };
 }

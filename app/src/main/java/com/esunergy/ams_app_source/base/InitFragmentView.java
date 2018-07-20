@@ -6,16 +6,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 
 import com.esunergy.ams_app_source.R;
-import com.esunergy.ams_app_source.fragments.ActionAddFragment;
-import com.esunergy.ams_app_source.fragments.ActionAddSelectEventFragment;
 import com.esunergy.ams_app_source.fragments.ActionDetailFragment;
 import com.esunergy.ams_app_source.fragments.ActionListFragment;
 import com.esunergy.ams_app_source.fragments.ActionOverdueListFragment;
 import com.esunergy.ams_app_source.fragments.ActionTodoListFragment;
 import com.esunergy.ams_app_source.fragments.IndexTabFragment;
-import com.esunergy.ams_app_source.fragments.LoginFragment;
-import com.esunergy.ams_app_source.fragments.MenuFragment;
-import com.esunergy.ams_app_source.fragments.SpeechAPITestFragment;
 
 /**
  *  切換各Fragment 功能
@@ -55,45 +50,6 @@ public class InitFragmentView {
     }
 
     /**
-     * 切換 選單頁面
-     */
-    public void initMenuView() {
-        MenuFragment menuFragment = new MenuFragment();
-
-        menuFragment.setArguments(bundle);
-        FragmentManager manager = _fm;
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right);
-
-        transaction.replace(R.id.fragment_frame, menuFragment);
-
-        if (!_PAGE_TAG.isEmpty()) {
-            transaction.addToBackStack(_PAGE_TAG);
-        }
-
-        transaction.commit();
-    }
-
-    /**
-     * 切換 登入頁面
-     */
-    public void initLoginView() {
-        LoginFragment loginFragment = new LoginFragment();
-
-        loginFragment.setArguments(bundle);
-        FragmentManager manager = _fm;
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right);
-        transaction.replace(R.id.fragment_frame, loginFragment);
-
-        if (!_PAGE_TAG.isEmpty()) {
-            transaction.addToBackStack(_PAGE_TAG);
-        }
-
-        transaction.commit();
-    }
-
-    /**
      * 切換 行動編輯頁面
      */
     public void initActionDetailView() {
@@ -104,120 +60,6 @@ public class InitFragmentView {
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right);
         transaction.replace(R.id.fragment_frame, actionDetailFragment);
-
-        if (!_PAGE_TAG.isEmpty()) {
-            transaction.addToBackStack(_PAGE_TAG);
-        }
-
-        transaction.commit();
-    }
-
-    /**
-     * 切換 行動查詢頁面
-     */
-    public void initActionListView() {
-        ActionListFragment actionListFragment = new ActionListFragment();
-
-        actionListFragment.setArguments(bundle);
-        FragmentManager manager = _fm;
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right);
-        transaction.replace(R.id.fragment_frame, actionListFragment);
-
-        if (!_PAGE_TAG.isEmpty()) {
-            transaction.addToBackStack(_PAGE_TAG);
-        }
-
-        transaction.commit();
-    }
-
-    /**
-     * 切換 行動查詢頁面
-     */
-    public void initActionTodoListView() {
-        ActionTodoListFragment actionTodoListFragment = new ActionTodoListFragment();
-
-        actionTodoListFragment.setArguments(bundle);
-        FragmentManager manager = _fm;
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right);
-        transaction.replace(R.id.fragment_frame, actionTodoListFragment);
-
-        if (!_PAGE_TAG.isEmpty()) {
-            transaction.addToBackStack(_PAGE_TAG);
-        }
-
-        transaction.commit();
-    }
-
-    /**
-     * 切換 行動查詢頁面
-     */
-    public void initActionOverdueListView() {
-        ActionOverdueListFragment actionOverdueListFragment = new ActionOverdueListFragment();
-
-        actionOverdueListFragment.setArguments(bundle);
-        FragmentManager manager = _fm;
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right);
-        transaction.replace(R.id.fragment_frame, actionOverdueListFragment);
-
-        if (!_PAGE_TAG.isEmpty()) {
-            transaction.addToBackStack(_PAGE_TAG);
-        }
-
-        transaction.commit();
-    }
-
-    /**
-     * 切換 新增行動選擇事件頁面
-     */
-    public void initActionAddSelectEventView() {
-        ActionAddSelectEventFragment actionAddSelectEventFragment = new ActionAddSelectEventFragment();
-
-        actionAddSelectEventFragment.setArguments(bundle);
-        FragmentManager manager = _fm;
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right);
-        transaction.replace(R.id.fragment_frame, actionAddSelectEventFragment);
-
-        if (!_PAGE_TAG.isEmpty()) {
-            transaction.addToBackStack(_PAGE_TAG);
-        }
-
-        transaction.commit();
-    }
-
-    /**
-     * 切換 新增行動頁面
-     */
-    public void initActionAddView() {
-        ActionAddFragment actionAddFragment = new ActionAddFragment();
-
-        actionAddFragment.setArguments(bundle);
-        FragmentManager manager = _fm;
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right);
-        transaction.replace(R.id.fragment_frame, actionAddFragment);
-
-        if (!_PAGE_TAG.isEmpty()) {
-            transaction.addToBackStack(_PAGE_TAG);
-        }
-
-        transaction.commit();
-    }
-
-    /**
-     * 切換 測試麥克風頁面
-     */
-    public void initSpeechTestView() {
-        SpeechAPITestFragment actionAddFragment = new SpeechAPITestFragment();
-
-        actionAddFragment.setArguments(bundle);
-        FragmentManager manager = _fm;
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right);
-        transaction.replace(R.id.fragment_frame, actionAddFragment);
 
         if (!_PAGE_TAG.isEmpty()) {
             transaction.addToBackStack(_PAGE_TAG);

@@ -11,14 +11,8 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-        def TIME_SECRET_KEY = "esunergy_ams@2018"
-        buildConfigField 'String', 'TIME_SECRET_KEY', toJavaCodeString(TIME_SECRET_KEY)
-
         def LOG_ENABLE = "logTRUE"
         buildConfigField 'String', 'LOG_ENABLE', toJavaCodeString(LOG_ENABLE)
-
-        def SERVER_BASE_URL = "http://118.163.87.193/AMS_API/"
-        buildConfigField 'String', 'SERVER_BASE_URL', toJavaCodeString(SERVER_BASE_URL)
     }
     buildTypes {
         release {

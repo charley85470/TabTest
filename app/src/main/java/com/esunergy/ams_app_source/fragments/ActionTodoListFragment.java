@@ -11,29 +11,18 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Spinner;
 
-import com.esunergy.ams_app_source.Constants;
 import com.esunergy.ams_app_source.R;
 import com.esunergy.ams_app_source.adapter.ActionListAdapter;
-import com.esunergy.ams_app_source.adapter.MySpinnerAdapter;
-import com.esunergy.ams_app_source.connection.ConnectionService;
-import com.esunergy.ams_app_source.connection.model.vwEventAction;
-import com.esunergy.ams_app_source.models.SelectItem;
-import com.esunergy.ams_app_source.utils.LogUtil;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import com.esunergy.ams_app_source.base.InitFragmentView;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ActionTodoListFragment extends BaseConnectionFragment implements View.OnTouchListener {
+public class ActionTodoListFragment extends BaseFragment implements View.OnTouchListener {
 
     private final String PAGE_TAG = "ActionTodoListFragment";
 
@@ -42,7 +31,6 @@ public class ActionTodoListFragment extends BaseConnectionFragment implements Vi
     private RecyclerView rv_action_list;
 
     private ActionListAdapter actionListAdapter;
-    private List<vwEventAction> eventActions;
 
     public ActionTodoListFragment() {
         // Required empty public constructor
@@ -64,33 +52,13 @@ public class ActionTodoListFragment extends BaseConnectionFragment implements Vi
         rv_action_list.setLayoutManager(layoutManager);
         rv_action_list.setAdapter(actionListAdapter);
 
-        showProgressDialog();
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("Company", Constants.userCompany);
-        jsonObject.addProperty("UserID", Constants.account);
-        mConnectionManager.sendGet(ConnectionService.getTodoActions, jsonObject, this, false);
+        List<String> strings = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            strings.add("" + i);
+        }
+        actionListAdapter.setData(strings);
 
         return topLayoutView;
-    }
-
-    @Override
-    public void onConnectionResponse(ConnectionService service, String result) {
-        dismissProgressDialog();
-
-        switch (service) {
-            case getTodoActions: {
-                LogUtil.LOGI(PAGE_TAG, "EventActions = " + result);
-                try {
-                    eventActions = gson.fromJson(result, new TypeToken<ArrayList<vwEventAction>>() {
-                    }.getType());
-
-                    actionListAdapter.setData(eventActions);
-                } catch (JsonSyntaxException e) {
-                    e.printStackTrace();
-                }
-                break;
-            }
-        }
     }
 
     @Override
