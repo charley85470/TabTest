@@ -101,7 +101,7 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
         long eventActionSn = bundle.getLong("EventActionSn");
         mConnectionManager.sendGet(ConnectionService.getAction, "/" + eventActionSn, ActionDetailFragment.this, false);
 
-        ctx = container.getContext();
+        ctx = getActivity();
         topLayoutView = LayoutInflater.from(ctx).inflate(R.layout.fragment_action_detail, container, false);
         dynamicViewLayout = topLayoutView.findViewById(R.id.dynamic_view_layout);
         tv_event_prop = topLayoutView.findViewById(R.id.tv_event_prop);
@@ -133,8 +133,14 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
     @Override
     public void onDestroy() {
         super.onDestroy();
-        speechManager.destroy();
-        ttsManager.destroy();
+        if (speechManager != null) {
+            speechManager.destroy();
+        }
+
+        if (ttsManager != null) {
+            ttsManager.destroy();
+        }
+
     }
 
     @Override
@@ -428,14 +434,14 @@ public class ActionDetailFragment extends BaseConnectionFragment implements View
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH)
         );
-        dpd.show(getFragmentManager(), tag);
+        dpd.show(getActivity().getFragmentManager(), tag);
     }
 
     private void showTimePicker(String tag) {
         TimePickerDialog tpd = TimePickerDialog.newInstance(ActionDetailFragment.this,
                 calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false);
         tpd.setVersion(TimePickerDialog.Version.VERSION_1);
-        tpd.show(getFragmentManager(), tag);
+        tpd.show(getActivity().getFragmentManager(), tag);
     }
 
     private SpeechRecognitionManager.SpeechListener speechListener = new SpeechRecognitionManager.SpeechListener() {

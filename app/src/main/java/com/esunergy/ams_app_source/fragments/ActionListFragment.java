@@ -80,6 +80,12 @@ public class ActionListFragment extends BaseConnectionFragment implements View.O
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        String s = "";
+    }
+
+    @Override
     public void onConnectionResponse(ConnectionService service, String result) {
         dismissProgressDialog();
 

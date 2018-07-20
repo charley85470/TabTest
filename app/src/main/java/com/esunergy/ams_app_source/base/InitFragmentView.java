@@ -1,8 +1,9 @@
 package com.esunergy.ams_app_source.base;
 
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 
 import com.esunergy.ams_app_source.R;
 import com.esunergy.ams_app_source.fragments.ActionAddFragment;
@@ -11,6 +12,7 @@ import com.esunergy.ams_app_source.fragments.ActionDetailFragment;
 import com.esunergy.ams_app_source.fragments.ActionListFragment;
 import com.esunergy.ams_app_source.fragments.ActionOverdueListFragment;
 import com.esunergy.ams_app_source.fragments.ActionTodoListFragment;
+import com.esunergy.ams_app_source.fragments.IndexTabFragment;
 import com.esunergy.ams_app_source.fragments.LoginFragment;
 import com.esunergy.ams_app_source.fragments.MenuFragment;
 import com.esunergy.ams_app_source.fragments.SpeechAPITestFragment;
@@ -210,6 +212,25 @@ public class InitFragmentView {
      */
     public void initSpeechTestView() {
         SpeechAPITestFragment actionAddFragment = new SpeechAPITestFragment();
+
+        actionAddFragment.setArguments(bundle);
+        FragmentManager manager = _fm;
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.setCustomAnimations(R.animator.slide_in_left, 0, 0, R.animator.slide_out_right);
+        transaction.replace(R.id.fragment_frame, actionAddFragment);
+
+        if (!_PAGE_TAG.isEmpty()) {
+            transaction.addToBackStack(_PAGE_TAG);
+        }
+
+        transaction.commit();
+    }
+
+    /**
+     * 切換 測試麥克風頁面
+     */
+    public void initTabTestView() {
+        IndexTabFragment actionAddFragment = new IndexTabFragment();
 
         actionAddFragment.setArguments(bundle);
         FragmentManager manager = _fm;

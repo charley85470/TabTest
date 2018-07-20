@@ -1,22 +1,24 @@
 package com.esunergy.ams_app_source.fragments;
 
 
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,6 +71,7 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
     private Spinner sp_event_prop, sp_action_title, sp_action;
     private EditText et_datetime_start, et_datetime_end, et_real_datetime_start, et_real_datetime_end;
     private TextView tv_event_title;
+    private Switch sw_speech_listen;
 
     private long _eventSn;
     private String _eventId;
@@ -108,6 +111,7 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
         et_real_datetime_start = topLayoutView.findViewById(R.id.et_real_datetime_start);
         et_real_datetime_end = topLayoutView.findViewById(R.id.et_real_datetime_end);
         tv_event_title = topLayoutView.findViewById(R.id.tv_event_title);
+        sw_speech_listen = topLayoutView.findViewById(R.id.sw_speech_listen);
 
         Bundle bundle = getArguments();
         _eventSn = bundle.getLong("EventSn");
@@ -325,6 +329,18 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
         });
 
         speechManager.setSpeechListener(speechListener);
+
+        sw_speech_listen.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                if (isChecked) {
+                    startSpeechRecognition();
+                } else {
+                    speechManager.stopListening();
+                }
+            }
+        });
     }
 
     @Override
@@ -533,14 +549,14 @@ public class ActionAddFragment extends BaseConnectionFragment implements View.On
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH)
         );
-        dpd.show(getFragmentManager(), tag);
+        dpd.show(getActivity().getFragmentManager(), tag);
     }
 
     private void showTimePicker(String tag) {
         TimePickerDialog tpd = TimePickerDialog.newInstance(ActionAddFragment.this,
                 calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false);
         tpd.setVersion(TimePickerDialog.Version.VERSION_1);
-        tpd.show(getFragmentManager(), tag);
+        tpd.show(getActivity().getFragmentManager(), tag);
     }
 
     private TextToSpeechManager.TTSProgressListener ttsProgressListener = new TextToSpeechManager.TTSProgressListener() {

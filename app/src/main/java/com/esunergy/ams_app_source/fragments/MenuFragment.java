@@ -144,7 +144,8 @@ public class MenuFragment extends BaseConnectionFragment implements View.OnTouch
                 break;
             }
             case R.id.btn_speech_test: {
-                initFragmentView.addToBackStack(PAGE_TAG).initSpeechTestView();
+                //initFragmentView.addToBackStack(PAGE_TAG).initSpeechTestView();
+                initFragmentView.addToBackStack(PAGE_TAG).initTabTestView();
                 break;
             }
         }

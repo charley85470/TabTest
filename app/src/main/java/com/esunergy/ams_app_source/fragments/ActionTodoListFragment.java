@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class ActionTodoListFragment extends BaseConnectionFragment implements View.OnTouchListener {
 
-    private final String PAGE_TAG = "ActionListFragment";
+    private final String PAGE_TAG = "ActionTodoListFragment";
 
     private Context ctx;
     private View topLayoutView;

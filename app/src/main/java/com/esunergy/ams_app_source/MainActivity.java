@@ -1,12 +1,12 @@
 package com.esunergy.ams_app_source;
 
 import android.Manifest;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -39,11 +39,11 @@ public class MainActivity extends AppCompatActivity {
         //checkPermission , checkVersion
         //checkVersion 檢查版本失敗~仍要可以進入APP
 
-        FragmentManager manager = getFragmentManager();
+        FragmentManager manager = getSupportFragmentManager();
         manager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
             @Override
             public void onBackStackChanged() {
-                FragmentManager manager = getFragmentManager();
+                FragmentManager manager = getSupportFragmentManager();
                 if (manager != null) {
                     Fragment fragment = manager.findFragmentById(R.id.fragment_frame);
                     if (fragment instanceof BaseFragment) {
@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
     public void popToMenuFragment() {
         if (getFragmentManager().getBackStackEntryCount() > 0) {
             getFragmentManager().popBackStackImmediate();
-            Fragment f = getFragmentManager().findFragmentById(R.id.fragment_frame);
+            Fragment f = getSupportFragmentManager().findFragmentById(R.id.fragment_frame);
             if (f instanceof MenuFragment) {
                 return;
             } else {

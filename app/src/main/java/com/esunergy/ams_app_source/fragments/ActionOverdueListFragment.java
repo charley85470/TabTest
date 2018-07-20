@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class ActionOverdueListFragment extends BaseConnectionFragment implements View.OnTouchListener {
 
-    private String PAGE_TAG = "ActionListFragment";
+    private String PAGE_TAG = "ActionOverdueListFragment";
 
     private Context ctx;
     private View topLayoutView;
